@@ -1,0 +1,10 @@
+name = "Labyrinthe"
+uuid = "7883e5b6-2d73-4142-8c3a-49b4ce821969"
+version = "0.1.0"
+
+[deps]
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
+
+[compat]
+DataStructures = "0.19.6"
