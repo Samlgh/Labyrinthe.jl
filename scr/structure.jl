@@ -6,16 +6,19 @@
 using DataStructures
 using Random
 
+mutable struct EtatJeu
+    position::Tuple{Int, Int}
+    coups::Int
+    victoire::Bool
+end
 
 function grille(l, c)
     return ones(Int, 2*l + 1, 2*c + 1)
 end
 
-
 function verif(ligne, colonne, L, C)
     return ligne < 1 || ligne > L || colonne < 1 || colonne > C
 end
-
 
 function deplacement!(position, labyrinthe, direction)
     ligne, colonne = position
@@ -28,16 +31,12 @@ function deplacement!(position, labyrinthe, direction)
 
     if direction == "H" # Haut
         nouvelle_ligne -= 1
-
     elseif direction == "B" # Bas
         nouvelle_ligne += 1
-
     elseif direction == "A" # Avancer
         nouvelle_colonne += 1
-
     elseif direction == "R" # Reculer
         nouvelle_colonne -= 1
-
     else
         println("Direction inconnue")
         return labyrinthe, ligne, colonne
@@ -46,7 +45,7 @@ function deplacement!(position, labyrinthe, direction)
     if verif(nouvelle_ligne, nouvelle_colonne, L, C)
         println("Pas possible : hors de la grille")
         return labyrinthe, ligne, colonne
-
+        
     elseif labyrinthe[nouvelle_ligne, nouvelle_colonne] == 1
         println("Pas possible : obstacle")
         return labyrinthe, ligne, colonne
@@ -61,7 +60,7 @@ function deplacement!(position, labyrinthe, direction)
     if labyrinthe[nouvelle_ligne, nouvelle_colonne] != 3
         labyrinthe[nouvelle_ligne, nouvelle_colonne] = 2
     end
-
+    
     return labyrinthe, nouvelle_ligne, nouvelle_colonne
 end
 
@@ -81,7 +80,6 @@ function creer_lab(l, c)
         if x < c
             push!(murs, ((x, y), (x + 1, y)))
         end
-
         if y < l
             push!(murs, ((x, y), (x, y + 1)))
         end
@@ -101,7 +99,7 @@ function creer_lab(l, c)
 
     # Joueur
     labyrinthe[2, 2] = 2
-
+    
     # Sortie
     labyrinthe[2*l, 2*c] = 3
 
