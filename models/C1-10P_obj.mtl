@@ -1,0 +1,19 @@
+# Local solid color resources.
+newmtl Orange
+Kd 1 1 1
+Ks 0.2 0.2 0.2
+Ns 25
+map_Kd couleurs/orange.png
+
+newmtl Sombre
+Kd 1 1 1
+Ks 0.2 0.2 0.2
+Ns 25
+map_Kd couleurs/sombre.png
+
+newmtl Metal
+Kd 1 1 1
+Ks 0.2 0.2 0.2
+Ns 25
+map_Kd couleurs/robot_metal.png
+

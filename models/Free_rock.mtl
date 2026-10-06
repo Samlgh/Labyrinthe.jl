@@ -1,0 +1,7 @@
+# Martian rock, locally generated texture.
+newmtl Free_rock
+Kd 1 1 1
+Ks 0.03 0.03 0.03
+Ns 4
+map_Kd textures/roche_mars_256.png
+
