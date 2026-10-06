@@ -4,7 +4,13 @@ version = "0.1.0"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+MeshIO = "7269a6da-0436-5bbc-96c2-40638cbb6118"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
 
 [compat]
 DataStructures = "0.19.6"
+FileIO = "1.20.0"
+GLMakie = "0.13.15"
+MeshIO = "0.5.5"
