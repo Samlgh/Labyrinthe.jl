@@ -54,7 +54,7 @@ function affichage_3D()
     modele_sol = load("models/sol_mars.obj")
 
     fig = Figure(size=(1100, 800), backgroundcolor="#281914")
-    Label(fig[1, 1], "MISSION MARS - Retour au vaisseau", fontsize=28, color="#ffe4c2")
+    Label(fig[1, 1:3], "MISSION MARS - Retour au vaisseau", fontsize=28, color="#ffe4c2")
     zone = LScene(fig[2, 1:3], show_axis=false)
     cam3d!(zone.scene, eyeposition=(0, -1, 2))
 
@@ -67,9 +67,8 @@ function affichage_3D()
     zoom!(zone.scene, 0.75)
 
     while isopen(fenetre)
-        direction = direction_clavier(fig)   
-
-        if time() - dernier_deplacement > 0.15
+        direction = ""
+        if time() - dernier_deplacement > 0.2
             direction = direction_clavier(fig)
             if direction != ""
                 dernier_deplacement = time()
@@ -86,6 +85,6 @@ function affichage_3D()
                 translate!(robot, colonne, -ligne, 0.1)
             end
         end
-        sleep(0.05)
+        sleep(0.03)
     end
 end
