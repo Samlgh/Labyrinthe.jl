@@ -1,4 +1,3 @@
-
 using FileIO, MeshIO, WGLMakie, Bonito
 using WGLMakie.Makie: Button
 
@@ -80,6 +79,7 @@ function afficher_labyrinthe(zone, labyrinthe, modele_robot, modele_vaisseau, mo
     robot = mesh!(zone, modele_robot)
     translate!(robot, 2, -2, 0.04)
     center!(zone.scene, 0.06)
+
     return robot, vaisseau, rochers
 end
 
@@ -110,7 +110,8 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
     modele_sol = load(aff.modele_sol)
 
     # La map et tous les boutons
-    fig = Figure(size=(1100, 800), backgroundcolor=aff.coul_fond)
+    police = WGLMakie.Makie.assetpath("fonts", "NotoSans-Regular.ttf")
+    fig = Figure(size=(1100, 800), backgroundcolor=aff.coul_fond, fonts=(regular=police,))
 
     haut = GridLayout(fig[1, 0:4])
     Label(haut[1, 1:2], aff.titre, fontsize=28, color=aff.coul_texte)
@@ -143,19 +144,45 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
     labyrinthe = creer_lab(lignes, colonnes)
     etat = EtatJeu((2, 2), 0, false)
     optimal = coups_optimaux(labyrinthe, (2, 2), (2*lignes, 2*colonnes))
-    robot, vaisseau, positions = afficher_labyrinthe(zone, labyrinthe, modele_robot, modele_vaisseau, modele_rocher, modele_sol)
+    robot, vaisseau, rochers = afficher_labyrinthe(zone, labyrinthe, modele_robot, modele_vaisseau, modele_rocher, modele_sol)
 
-    # Afficher les coups et vérifier la victoire
+    # Chemin de la solution optimale
+    montrer_solution = false
+    points_solution = Observable(Point3f[])
+    lines!(zone, points_solution, color=:blue, linewidth=5)
+
+
+    # Afficher les coups et vérifier la victoire et la solution
     function actualiser!()
         score.text[] = string(etat.coups)
         minimum.text[] = string(optimal)
 
         if etat.victoire
-            message.text[] = "VICTOIRE ! Adios le robot."
+            message.text[] = "VICTOIRE ! Vous avez rejoint la sortie."
+            montrer_solution = false
         else
             message.text[] = "Rejoignez la sortie !"
         end
+
+        points = Point3f[]
+
+        if montrer_solution
+            chemin = chemin_optimal(labyrinthe, etat.position, (2*lignes, 2*colonnes))
+
+            for (ligne, colonne) in chemin
+                push!(points, Point3f(colonne, -ligne, 0.06))
+            end
+        end
+
+        points_solution[] = points
+
+        if montrer_solution
+            solution.label[] = "Masquer"
+        else
+            solution.label[] = "Solution"
+        end
     end
+
 
     #Déplacer le robot
     function deplacer!(direction)
@@ -196,11 +223,51 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
         actualiser!()
     end
 
+
+    # Avancer d'une case avec Indice +1
+    function indice!()
+        if etat.victoire
+            return
+        end
+
+        chemin = chemin_optimal(labyrinthe, etat.position, (2*lignes, 2*colonnes))
+
+        if length(chemin) < 2
+            return
+        end
+
+        ligne, colonne = etat.position
+        prochaine_ligne, prochaine_colonne = chemin[2]
+
+        if prochaine_ligne < ligne
+            deplacer!("H")
+        elseif prochaine_ligne > ligne
+            deplacer!("B")
+        elseif prochaine_colonne < colonne
+            deplacer!("R")
+        else
+            deplacer!("A")
+        end
+    end
+
+
+    # Afficher ou masquer la solution
+    function solution!()
+        if etat.victoire
+            return
+        end
+
+        montrer_solution = !montrer_solution
+        actualiser!()
+    end
+
+
     # On remet la caméra au départ
     function cadrer!()
         cam3d!(zone.scene, eyeposition=(0, -1, 2))
         center!(zone.scene, 0.06)
     end
+
 
     # Nouveau labyrinthe
     function nouvelle_partie!()
@@ -208,13 +275,20 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
         etat.position = (2, 2)
         etat.coups = 0
         etat.victoire = false
+        montrer_solution = false
         optimal = coups_optimaux(labyrinthe, (2, 2), (2*lignes, 2*colonnes))
 
-        # Changer les positions des rochers
+        # Replacer les rochers
         L, C = size(labyrinthe)
-        positions[] = [Point3f(colonne, -ligne, 0.02)
-                       for ligne in 1:L, colonne in 1:C
-                       if labyrinthe[ligne, colonne] == 1]
+        numero = 1
+        for ligne in 1:L
+            for colonne in 1:C
+                if labyrinthe[ligne, colonne] == 1
+                    translate!(rochers[numero], colonne, -ligne, 0.02)
+                    numero += 1
+                end
+            end
+        end
 
         # Remettre le robot au départ
         translate!(robot, 2, -2, 0.04)
@@ -224,6 +298,7 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
         cadrer!()
         actualiser!()
     end
+
 
     #Retourne à l'accueil
     function revenir_menu!()
@@ -247,9 +322,14 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
         revenir_menu!()
     end
 
-    # Indice +1 et Solution pour après
+    on(indice.clicks) do _
+        indice!()
+    end
 
-    # Un appui sur une flèche déplace le robot
+    on(solution.clicks) do _
+        solution!()
+    end
+
     brancher_clavier!(deplacer!, fig)
 
     actualiser!()
