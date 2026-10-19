@@ -74,8 +74,6 @@ Puis ouvrir le lien : **http://127.0.0.1:8766**.
 
 - LES MODES SHEEP LE MOUTON & CARINE LA CITADINE 
 - AMELIORER LE STYLE DU MENU ET DU JEU ?
-- UN ECRAN DE VICTOIRE
-- UN BTN POV POUR AVOIR LE POINT DE VUE IMMERSIF DU ROBOT (OU PAS LA PEINE)
+- EFFECTUER DES TESTS UNITAIRES
 - REDIGER LE RAPPORT HTML (avec Quarto ou un notebook Julia)
 - FAIRE LA PRESENTATION HTML (avec KaimonSlate ou BonitoBook)
-- effectuer des test unitaire (ca sera valoriser par le prof)
