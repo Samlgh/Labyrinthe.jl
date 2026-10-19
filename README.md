@@ -79,3 +79,4 @@ Puis ouvrir le lien : **http://127.0.0.1:8766**.
 - UN BTN POV POUR AVOIR LE POINT DE VUE IMMERSIF DU ROBOT (OU PAS LA PEINE)
 - REDIGER LE RAPPORT HTML (avec Quarto ou un notebook Julia)
 - FAIRE LA PRESENTATION HTML (avec KaimonSlate ou BonitoBook)
+- effectuer des test unitaire (ca sera valoriser par le prof)
