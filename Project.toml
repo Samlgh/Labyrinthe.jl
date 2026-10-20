@@ -1,6 +1,7 @@
 name = "Labyrinthe"
-uuid = "7883e5b6-2d73-4142-8c3a-49b4ce821969"
-version = "0.3.0"
+uuid = "a40e9942-e69d-415c-84c3-59e089f130e2"
+version = "0.1.0"
+authors = ["Samlgh <laghrouchesamir05@gmail.com>"]
 
 [deps]
 Base64 = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
@@ -14,11 +15,10 @@ WGLMakie = "276b4fcb-3e11-5398-bf8b-a0c2d153d008"
 
 [compat]
 Base64 = "1.11.0"
-Bonito = "5.2"
-DataStructures = "0.19"
-FileIO = "1"
+Bonito = "5.2.0"
+DataStructures = "0.19.6"
+FileIO = "1.20.0"
 GeometryBasics = "0.5.13"
-MeshIO = "0.5"
+MeshIO = "0.5.5"
 Random = "1.11.0"
-WGLMakie = "0.13.15"
-julia = "1.12"
+WGLMakie = "0.13.16"

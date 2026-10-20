@@ -1,5 +1,11 @@
-using FileIO, MeshIO, WGLMakie, Bonito
+using FileIO, MeshIO, WGLMakie, Bonito, GeometryBasics
 using WGLMakie.Makie: Button
+
+# Charger les modèles 3D avec leurs coordonnées de texture
+function charger_modele(chemin)
+    modele = load(chemin; uvtype=Vec2f)
+    return GeometryBasics.expand_faceviews(modele)
+end
 
 # Dossier des modèles 3D
 const dossier_models = normpath(joinpath(@__DIR__, "..", "models"))
@@ -104,10 +110,10 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
 
     WGLMakie.activate!(; use_html_widgets=false)
 
-    modele_robot = load(aff.modele_perso)
-    modele_vaisseau = load(aff.modele_sorti)
-    modele_rocher = load(aff.modele_obs)
-    modele_sol = load(aff.modele_sol)
+    modele_robot = charger_modele(aff.modele_perso)
+    modele_vaisseau = charger_modele(aff.modele_sorti)
+    modele_rocher = charger_modele(aff.modele_obs)
+    modele_sol = charger_modele(aff.modele_sol)
 
     # La map et tous les boutons
     police = WGLMakie.Makie.assetpath("fonts", "NotoSans-Regular.ttf")
@@ -149,7 +155,7 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
     # Chemin de la solution optimale
     montrer_solution = false
     points_solution = Observable(Point3f[])
-    lines!(zone, points_solution, color=:blue, linewidth=5)
+    lines!(zone, points_solution, color=:cyan, linewidth=5)
 
 
     # Afficher les coups et vérifier la victoire et la solution
