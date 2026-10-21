@@ -72,12 +72,15 @@ Puis ouvrir le lien : **http://127.0.0.1:8766**.
 
 ## 6. Ce qu'il reste à faire
 
-- Rendre le projet plus modulaire et mieux structuré, en respectant au max les conventions de programmation de Julia :
-Mieux organiser le code en séparant les différentes fonctionnalités et en utilisant des struct pour représenter les éléments du jeu, avec des mutable struct lorsque leurs attributs doivent être modifiés.
-Respecter les conventions de nommage Julia : par exemple, renommer Modele_affichage en ModeleAffichage.
-Mieux représenter la génération du labyrinthe : par exemple, utiliser une structure LabyrintheKruskal plutôt que fonction creer_lab().
-Distinguer les fonctions internes des fonctions principales : par exemple, renommer charger_modele(chemin) en _charger_modele(chemin) pour dire qu'elle est destinée à un usage interne.
-- Améliorer le Design du menu
-- EFFECTUER DES TESTS UNITAIRES
-- REDIGER LE RAPPORT HTML (avec Quarto ou un notebook Julia)
-- FAIRE LA PRESENTATION HTML (avec KaimonSlate ou BonitoBook)
+#### Hannah
+- **Rendre le projet plus modulaire et mieux structuré, en respectant au max les conventions de programmation de Julia :**
+  - Mieux organiser le code en séparant les différentes fonctionnalités et en utilisant des struct pour représenter les éléments du jeu, avec des mutable struct lorsque leurs attributs doivent être modifiés.
+  - Respecter les conventions de nommage Julia : par exemple, renommer Modele_affichage en ModeleAffichage.
+  - Mieux représenter la génération du labyrinthe : par exemple, utiliser une structure LabyrintheKruskal plutôt que fonction creer_lab().
+  - Distinguer les fonctions internes des fonctions principales : par exemple, renommer charger_modele(chemin) en _charger_modele(chemin) pour dire qu'elle est destinée à un usage interne.
+- **EFFECTUER DES TESTS UNITAIRES**
+
+ #### Samir :
+- **Améliorer le Design du menu et mettre les autres modèles**
+- **REDIGER LE RAPPORT HTML (avec Quarto ou un notebook Julia)**
+- **FAIRE LA PRESENTATION HTML (avec KaimonSlate ou BonitoBook)**
