@@ -16,12 +16,14 @@ function interface_menue(lancer_partie)
 
     nl = Textbox(g[2, 1],
         placeholder = "Entre le nombre de lignes, puis Entrée...",
+        stored_string = "10",
         width = 450, fontsize = 20, textcolor = "#281914",
         boxcolor = "#F8F5EF", bordercolor = "#281914",
         cornerradius = 8, validator = Int)
 
     nc = Textbox(g[3, 1],
         placeholder = "Entre le nombre de colonnes, puis Entrée...",
+        stored_string = "10",
         width = 450, fontsize = 20, textcolor = "#281914",
         boxcolor = "#F8F5EF", bordercolor = "#281914",
         cornerradius = 8, validator = Int)
@@ -123,8 +125,9 @@ function creer_page()
     end
 
     function lancer_partie!(lignes, colonnes, personnage)
-        # Récupérer le thème choisi
+        # Récupérer le thème choisi ainsi que son fond
         aff = MODES[personnage]
+        fond_uri = "data:image/png;base64," * base64encode(read(aff.fond))
         # On crée le jeu et lui donne la fonction de retour au menu
         fig = affichage_3D(
             lignes, colonnes, aff;
@@ -136,10 +139,15 @@ function creer_page()
         )
          style_page = """
             min-height:100vh;
+            width:100%;
             display:flex;
             align-items:center;
             justify-content:center;
             background-color:$(aff.coul_fond);
+            background-image:url('$fond_uri');
+            background-size:cover;
+            background-position:center;
+            background-repeat:no-repeat;
         """
 
         page[] = DOM.div(contenu; style = style_page)
