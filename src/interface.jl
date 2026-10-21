@@ -17,6 +17,7 @@ Base.@kwdef struct Modele_affichage # Base.@kwdef permet d'affecter les valeur s
     modele_sorti::String
     modele_obs::String
     modele_sol::String
+    fond::String
     coul_texte::String
     coul_fond::String
 end
@@ -28,6 +29,7 @@ const MODES = Dict(
         modele_sorti = joinpath(dossier_models, "UFO.obj"),
         modele_obs = joinpath(dossier_models, "Free_rock.obj"),
         modele_sol = joinpath(dossier_models, "sol_mars.obj"),
+        fond = joinpath(dossier_models, "fonds", "mars.png"),
         coul_texte = "#ffe4c2", coul_fond = "#281914"),
 
     "sheep le mouton" => Modele_affichage(
@@ -36,6 +38,7 @@ const MODES = Dict(
         modele_sorti = joinpath(dossier_models, "UFO.obj"),
         modele_obs = joinpath(dossier_models, "Free_rock.obj"),
         modele_sol = joinpath(dossier_models, "sol_mars.obj"),
+        fond = joinpath(dossier_models, "fonds", "prairie.png"),
         coul_texte = "#E8F5D0", coul_fond = "#1B3A1B"),
 
     "carine la citadine" => Modele_affichage(
@@ -44,6 +47,7 @@ const MODES = Dict(
         modele_sorti = joinpath(dossier_models, "UFO.obj"),
         modele_obs = joinpath(dossier_models, "Free_rock.obj"),
         modele_sol = joinpath(dossier_models, "sol_mars.obj"),
+        fond = joinpath(dossier_models, "fonds", "ville.png"),
         coul_texte = "#D6E4F5", coul_fond = "#1E2A3A"),
 )
 
@@ -53,7 +57,6 @@ const touche_clavier = Dict(
     Keyboard.left => "R",
     Keyboard.right => "A",
 )
-
 
 function afficher_labyrinthe(zone, labyrinthe, modele_robot, modele_vaisseau, modele_rocher, modele_sol)
     # Effacer les dessins de la partie précédente
@@ -117,7 +120,7 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
 
     # La map et tous les boutons
     police = WGLMakie.Makie.assetpath("fonts", "NotoSans-Regular.ttf")
-    fig = Figure(size=(1100, 800), backgroundcolor=aff.coul_fond, fonts=(regular=police,))
+    fig = Figure(size=(1100, 800), backgroundcolor=:transparent, fonts=(regular=police,))
 
     haut = GridLayout(fig[1, 0:4])
     Label(haut[1, 1:2], aff.titre, fontsize=28, color=aff.coul_texte)
