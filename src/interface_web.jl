@@ -1,55 +1,75 @@
 using FileIO, MeshIO, WGLMakie, Bonito, Base64, GeometryBasics
-using WGLMakie.Makie: Menu, Textbox
+using WGLMakie.Makie: Textbox
 
-function interface_menue(lancer_partie)
-    WGLMakie.activate!(; use_html_widgets = true)
+function interface_menue(lancer_partie, lignes=10, colonnes=10, personnage="nono le robot")
+    WGLMakie.activate!(; use_html_widgets=false)
 
-    ### chemin general pour l'image de fond ###
-    chemin = joinpath(dossier_models, "font_inter.png")
-    img_uri = "data:image/png;base64," * base64encode(read(chemin))
-
-    fig = Figure(size = (1100, 800), backgroundcolor = "#F1EDE4")
+    fig = Figure(size=(1100, 800), backgroundcolor="#F7F4EB", figure_padding=35)
     g = fig[1, 1] = GridLayout()
 
-    Label(g[1, 1], "Bienvenue sur le labyrinthe des Malicieux",
-        color = :black, font = :bold, fontsize = 33, halign = :center)
+    Label(g[1, 1:3], "Bienvenue sur le labyrinthe\ndes Malicieux", fontsize=36, font=:bold, color="#10394B")
+    Label(g[2, 1:3], "Choisissez la taille du labyrinthe et votre personnage,\npuis lancez l'aventure !", fontsize=19, color="#737D86")
 
-    nl = Textbox(g[2, 1],
-        placeholder = "Entre le nombre de lignes, puis Entrée...",
-        stored_string = "10",
-        width = 450, fontsize = 20, textcolor = "#281914",
-        boxcolor = "#F8F5EF", bordercolor = "#281914",
-        cornerradius = 8, validator = Int)
+    # Les dimensions de la prochaine partie
+    dimensions = GridLayout(g[3, 1:3])
+    Label(dimensions[1, 1], "Lignes", fontsize=20, color="#53616D")
+    nl = Textbox(dimensions[1, 2], stored_string=string(lignes), validator=Int, width=110, height=45, fontsize=20, boxcolor="#FFFCF6", textcolor="#10394B")
+    Label(dimensions[1, 3], "Colonnes", fontsize=20, color="#53616D")
+    nc = Textbox(dimensions[1, 4], stored_string=string(colonnes), validator=Int, width=110, height=45, fontsize=20, boxcolor="#FFFCF6", textcolor="#10394B")
 
-    nc = Textbox(g[3, 1],
-        placeholder = "Entre le nombre de colonnes, puis Entrée...",
-        stored_string = "10",
-        width = 450, fontsize = 20, textcolor = "#281914",
-        boxcolor = "#F8F5EF", bordercolor = "#281914",
-        cornerradius = 8, validator = Int)
+    Label(g[4, 1:3], "Choisissez votre personnage", fontsize=24, font=:bold, color="#10394B")
+    noms = ["nono le robot", "sheep le mouton", "carine la citadine"]
+    images = ["robot.png", "mouton.png", "voiture.png"]
+    choix = Observable(personnage)
+    boutons = []
+    cartes = []
 
-    menu = Menu(g[4, 1],
-        options = ["nono le robot", "sheep le mouton", "carine la citadine"],
-        prompt = "Choisis ton personnage...",
-        width = 450, fontsize = 20, textcolor = "#281914",
-        cell_color_inactive_even = "#F8F5EF",
-        cell_color_inactive_odd = "#EFEBE3",
-        cell_color_hover = "#D9CFBC",
-        cell_color_active = "#B5ADA3",
-        selection_cell_color_inactive = "#F8F5EF",
-        dropdown_arrow_color = "#281914")
+    # Une carte par personnage
+    for i in 1:3
+        carte = GridLayout(g[5, i])
+        fond_carte = Box(g[5, i], color="#FFFCF6", strokecolor="#E5E1D8")
+        push!(cartes, fond_carte)
+        chemin = joinpath(dossier_models, "menu", images[i])
+        if isfile(chemin)
+            cadre = Axis(carte[1, 1], aspect=DataAspect(), backgroundcolor=:transparent)
+            image!(cadre, rotr90(load(chemin)))
+            hidedecorations!(cadre)
+            hidespines!(cadre)
+        else
+            Label(carte[1, 1], "", height=145)
+        end
+        bouton = Button(carte[2, 1], label=noms[i], fontsize=19, width=270, height=48, labelcolor="#10394B", buttoncolor="#ECE9E0")
+        push!(boutons, bouton)
+        on(bouton.clicks) do _
+            choix[] = noms[i]
+        end
+    end
 
-    btn = Makie.Button(g[5, 1],
-        label = "Lancer", width = 200, height = 45, fontsize = 24,
-        buttoncolor = "#281914", buttoncolor_hover = "#4A3028",
-        buttoncolor_active = "#6B463A", labelcolor = "#F1EDE4",
-        labelcolor_hover = :white, labelcolor_active = :white,
-        cornerradius = 10)
+    # La carte du personnage choisi devient bleue
+    on(choix) do nom
+        for i in 1:3
+            if noms[i] == nom
+                cartes[i].color[] = "#E5F4FF"
+                cartes[i].strokecolor[] = "#0099FF"
+                boutons[i].buttoncolor[] = "#CDEBFF"
+                boutons[i].labelcolor[] = "#0077CF"
+            else
+                cartes[i].color[] = "#FFFCF6"
+                cartes[i].strokecolor[] = "#E5E1D8"
+                boutons[i].buttoncolor[] = "#ECE9E0"
+                boutons[i].labelcolor[] = "#10394B"
+            end
+        end
+    end
+    notify(choix)
 
-    message = Label(g[6, 1], "", color = "#8B1A1A", fontsize = 20)
-    rowgap!(g, 20)
+    btn = Button(g[6, 1:3], label="Lancer", width=290, height=58, fontsize=25, buttoncolor="#0B4B61", labelcolor=:white)
+    message = Label(g[7, 1:3], "", color="#A33C35", fontsize=17)
+    rowgap!(g, 18)
+    colgap!(g, 22)
+    rowsize!(g, 5, 215)
 
-    # Le clic dépose les paramètres dans un canal ; le jeu démarre en dehors du callback
+    # Le clic dépose les paramètres dans un canal, le jeu démarre en dehors du callback
     canal = Channel{Tuple{Int,Int,String}}(1)
     # on évite de lancer deux parties par un double clicc
     chargement = false
@@ -58,10 +78,10 @@ function interface_menue(lancer_partie)
         if chargement
             return
         end
-        # MODIF : on lit les valeurs sans appuyer sur Entrée
+        # on lit les valeurs sans appuyer sur Entrée
         n_lignes = tryparse(Int, strip(nl.displayed_string[]))
         n_colonnes = tryparse(Int, strip(nc.displayed_string[]))
-        p = menu.selection[]
+        p = choix[]
 
         if isnothing(n_lignes) || isnothing(n_colonnes) || isnothing(p)
             message.text[] = "Remplis tous les champs !"
@@ -71,7 +91,7 @@ function interface_menue(lancer_partie)
             message.text[] = "Il faut au moins 5 lignes et 5 colonnes."
             return
         end
-        ### On limite la taille pour pas abuser, et on vérif le personnage ###
+        # On limite la taille pour pas abuser, et on vérif le personnage
         if n_lignes > 20 || n_colonnes > 20
             message.text[] = "Choisis au maximum 20 lignes et 20 colonnes."
             return
@@ -97,30 +117,33 @@ function interface_menue(lancer_partie)
         end
     end
 
-    style = Bonito.Styles(
-        Bonito.CSS(".accueil",
-            "margin" => "0",
-            "min-height" => "100vh",
-            "display" => "flex",
-            "justify-content" => "center",
-            "align-items" => "center",
-            "background-color" => "#EFEBE3",
-            "background-image" => "url('$img_uri')",
-            "background-size" => "cover",
-            "background-position" => "center"
-        )
-    )
-    return DOM.div(style, DOM.div(fig; style="width:1100px;flex-shrink:0;"); class="accueil")
-end
+    # L'image de fond autour du menu
+    chemin = joinpath(dossier_models, "fonds", "font_inter.png")
+    image_fond = "data:image/png;base64," * base64encode(read(chemin))
 
+    panneau = DOM.div(fig; style="flex-shrink:0;")
+    return DOM.div(panneau; style="""
+        min-height:100vh;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background-image:url('$image_fond');
+        background-size:cover;
+        background-position:center;
+    """)
+end
 
 # Passer du menu au jeu et revenir au menu
 function creer_page()
     # Contient l'écran affiché dans le navigateur
     page = Observable{Any}(nothing)
+    # Garder les derniers choix pendant la visite
+    dernieres_lignes = 10
+    dernieres_colonnes = 10
+    dernier_personnage = "nono le robot"
 
     function afficher_menu!()
-        page[] = interface_menue(lancer_partie!)
+        page[] = interface_menue(lancer_partie!, dernieres_lignes, dernieres_colonnes, dernier_personnage)
         return nothing
     end
 
@@ -151,6 +174,9 @@ function creer_page()
         """
 
         page[] = DOM.div(contenu; style = style_page)
+        dernieres_lignes = lignes
+        dernieres_colonnes = colonnes
+        dernier_personnage = personnage
         return nothing
     end
 
