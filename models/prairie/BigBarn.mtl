@@ -1,0 +1,46 @@
+# Blender MTL File: 'BigBarn.blend'
+# Material Count: 4
+
+newmtl DarkRed
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 1.5 1.5 1.5
+map_Kd textures/BigBarn_DarkRed.png
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl LightRed
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 1.5 1.5 1.5
+map_Kd textures/BigBarn_LightRed.png
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl RoofBlack
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 1.5 1.5 1.5
+map_Kd textures/BigBarn_RoofBlack.png
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2
+
+newmtl White
+Ns 96.078431
+Ka 1.000000 1.000000 1.000000
+Kd 1.5 1.5 1.5
+map_Kd textures/BigBarn_White.png
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.000000
+d 1.000000
+illum 2

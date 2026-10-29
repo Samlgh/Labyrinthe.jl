@@ -1,0 +1,78 @@
+newmtl herbe6
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_herbe6.png
+
+newmtl herbe0
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_herbe0.png
+
+newmtl herbe3
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_herbe3.png
+
+newmtl herbe4
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_herbe4.png
+
+newmtl herbe7
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_herbe7.png
+
+newmtl herbe1
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_herbe1.png
+
+newmtl herbe5
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_herbe5.png
+
+newmtl herbe2
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_herbe2.png
+
+newmtl feuille_claire
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_feuille_claire.png
+
+newmtl fleur
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_fleur.png
+
+# Created by Kenney (www.kenney.nl)
+
+newmtl barriere_wood
+  Kd 0.88 0.31 0.08
+
+newmtl barriere_woodDark
+  Kd 0.51 0.18 0.05
+
