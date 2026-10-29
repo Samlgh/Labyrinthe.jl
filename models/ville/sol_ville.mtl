@@ -1,0 +1,76 @@
+newmtl pave6
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_pave6.png
+
+newmtl pave0
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_pave0.png
+
+newmtl pave3
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_pave3.png
+
+newmtl pave4
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_pave4.png
+
+newmtl pave7
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_pave7.png
+
+newmtl pave1
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_pave1.png
+
+newmtl pave5
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_pave5.png
+
+newmtl pave2
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_pave2.png
+
+newmtl route
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_route.png
+
+newmtl bordure
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_bordure.png
+
+newmtl marquage
+Kd 1 1 1
+Ks 0.05 0.05 0.05
+Ns 12
+illum 2
+map_Kd couleurs/modes_marquage.png
