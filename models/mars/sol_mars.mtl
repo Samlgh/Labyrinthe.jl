@@ -1,0 +1,13 @@
+# Martian sand and decorative rocks.
+newmtl Sable
+Kd 1 1 1
+Ks 0.01 0.01 0.01
+Ns 2
+map_Kd textures/sable_mars.png
+
+newmtl Roches
+Kd 1 1 1
+Ks 0.03 0.03 0.03
+Ns 4
+map_Kd textures/roche_mars.png
+
