@@ -105,3 +105,14 @@ function creer_lab(l, c)
 
     return labyrinthe
 end
+
+# struct Labyrinthe
+#     l::Int
+#     c::Int
+#     grid::Matrix{Int}
+
+#     function Labyrinthe(l::Int, c::Int)
+#         grid = ones(Int, 2l + 1, 2c + 1)
+#         return new(l,c,grid)
+#     end
+# end

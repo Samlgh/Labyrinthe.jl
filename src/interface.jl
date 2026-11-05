@@ -9,7 +9,7 @@ end
 
 # Dossier des modèles 3D
 const dossier_models = normpath(joinpath(@__DIR__, "..", "models"))
-const dossier_textures = joinpath(dossier_models, "mars", "textures")
+const dossier_textures = joinpath(dossier_models, "textures")
 
 Base.@kwdef struct Modele_affichage # Base.@kwdef permet d'affecter les valeur sans respect l'ordre 
     titre::String
@@ -17,7 +17,6 @@ Base.@kwdef struct Modele_affichage # Base.@kwdef permet d'affecter les valeur s
     modele_sorti::String
     modele_obs::String
     modele_sol::String
-    fond::String
     coul_texte::String
     coul_fond::String
 end
@@ -25,29 +24,26 @@ end
 const MODES = Dict(
     "nono le robot" => Modele_affichage(
         titre = "MISSION MARS - Retour au vaisseau",
-        modele_perso = joinpath(dossier_models, "mars", "C1-10P_obj.obj"),
-        modele_sorti = joinpath(dossier_models, "mars", "UFO.obj"),
-        modele_obs = joinpath(dossier_models, "mars", "Free_rock.obj"),
-        modele_sol = joinpath(dossier_models, "mars", "sol_mars.obj"),
-        fond = joinpath(dossier_models, "fonds", "mars.png"),
+        modele_perso = joinpath(dossier_models, "C1-10P_obj.obj"),
+        modele_sorti = joinpath(dossier_models, "UFO.obj"),
+        modele_obs = joinpath(dossier_models, "Free_rock.obj"),
+        modele_sol = joinpath(dossier_models, "sol_mars.obj"),
         coul_texte = "#ffe4c2", coul_fond = "#281914"),
 
     "sheep le mouton" => Modele_affichage(
-        titre = "LA FERME - Retour à la grange",
-        modele_perso = joinpath(dossier_models, "prairie", "Sheep.obj"),
-        modele_sorti = joinpath(dossier_models, "prairie", "BigBarn.obj"),
-        modele_obs = joinpath(dossier_models, "prairie", "HayStack.obj"),
-        modele_sol = joinpath(dossier_models, "prairie", "sol_prairie.obj"),
-        fond = joinpath(dossier_models, "fonds", "prairie.png"),
+        titre = "LA PRAIRIE - Retour à l'enclos",
+        modele_perso = joinpath(dossier_models, "C1-10P_obj.obj"),
+        modele_sorti = joinpath(dossier_models, "UFO.obj"),
+        modele_obs = joinpath(dossier_models, "Free_rock.obj"),
+        modele_sol = joinpath(dossier_models, "sol_mars.obj"),
         coul_texte = "#E8F5D0", coul_fond = "#1B3A1B"),
 
     "carine la citadine" => Modele_affichage(
         titre = "LA VILLE - Retour à la maison",
-        modele_perso = joinpath(dossier_models, "ville", "voiture.obj"),
-        modele_sorti = joinpath(dossier_models, "ville", "maison.obj"),
-        modele_obs = joinpath(dossier_models, "ville", "muret_ville.obj"),
-        modele_sol = joinpath(dossier_models, "ville", "sol_ville.obj"),
-        fond = joinpath(dossier_models, "fonds", "ville.png"),
+        modele_perso = joinpath(dossier_models, "C1-10P_obj.obj"),
+        modele_sorti = joinpath(dossier_models, "UFO.obj"),
+        modele_obs = joinpath(dossier_models, "Free_rock.obj"),
+        modele_sol = joinpath(dossier_models, "sol_mars.obj"),
         coul_texte = "#D6E4F5", coul_fond = "#1E2A3A"),
 )
 
@@ -58,7 +54,8 @@ const touche_clavier = Dict(
     Keyboard.right => "A",
 )
 
-function afficher_labyrinthe(zone, labyrinthe, modele_personnage, modele_arrivee, modele_obstacle, modele_sol)
+
+function afficher_labyrinthe(zone, labyrinthe, modele_robot, modele_vaisseau, modele_rocher, modele_sol)
     # Effacer les dessins de la partie précédente
     for dessin in copy(zone.scene.plots)
         delete!(zone, dessin)
@@ -70,26 +67,29 @@ function afficher_labyrinthe(zone, labyrinthe, modele_personnage, modele_arrivee
     scale!(sol, C+1, L+1, 1)
     translate!(sol, 0, -L-1, -0.02)
 
-    obstacles = []
-    for ligne in 1:L, colonne in 1:C
-        if labyrinthe[ligne, colonne] == 1
-            obstacle = mesh!(zone, modele_obstacle)
-            scale!(obstacle, 1, 1, 3)
-            translate!(obstacle, colonne, -ligne, 0.02)
-            push!(obstacles, obstacle)
+    # Afficher les rochers avec leurs textures
+    rochers = []
+    for ligne in 1:L
+        for colonne in 1:C
+            if labyrinthe[ligne, colonne] == 1
+                rocher = mesh!(zone, modele_rocher)
+                scale!(rocher, 1, 1, 3)
+                translate!(rocher, colonne, -ligne, 0.02)
+                push!(rochers, rocher)
+            end
         end
     end
 
-    arrivee = mesh!(zone, modele_arrivee)
-    translate!(arrivee, C-1, -(L-1), 0.16)
-    personnage = mesh!(zone, modele_personnage)
-    translate!(personnage, 2, -2, 0.04)
+    vaisseau = mesh!(zone, modele_vaisseau)
+    translate!(vaisseau, C-1, -(L-1), 0.16)
+    robot = mesh!(zone, modele_robot)
+    translate!(robot, 2, -2, 0.04)
     center!(zone.scene, 0.06)
 
-    return personnage, arrivee, obstacles
+    return robot, vaisseau, rochers
 end
 
-# Faire fonctionner les touches du clavier pour le déplacement du personnage
+# Faire fonctionner les touches du clavier pour le déplacement du robot
 function brancher_clavier!(quand_direction, fig)
     on(events(fig).keyboardbutton; priority=10) do event
         if haskey(touche_clavier, event.key)
@@ -110,14 +110,14 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
 
     WGLMakie.activate!(; use_html_widgets=false)
 
-    modele_personnage = charger_modele(aff.modele_perso)
-    modele_arrivee = charger_modele(aff.modele_sorti)
-    modele_obstacle = charger_modele(aff.modele_obs)
+    modele_robot = charger_modele(aff.modele_perso)
+    modele_vaisseau = charger_modele(aff.modele_sorti)
+    modele_rocher = charger_modele(aff.modele_obs)
     modele_sol = charger_modele(aff.modele_sol)
 
     # La map et tous les boutons
     police = WGLMakie.Makie.assetpath("fonts", "NotoSans-Regular.ttf")
-    fig = Figure(size=(1100, 800), backgroundcolor=:transparent, fonts=(regular=police,))
+    fig = Figure(size=(1100, 800), backgroundcolor=aff.coul_fond, fonts=(regular=police,))
 
     haut = GridLayout(fig[1, 0:4])
     Label(haut[1, 1:2], aff.titre, fontsize=28, color=aff.coul_texte)
@@ -150,13 +150,13 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
     labyrinthe = creer_lab(lignes, colonnes)
     etat = EtatJeu((2, 2), 0, false)
     optimal = coups_optimaux(labyrinthe, (2, 2), (2*lignes, 2*colonnes))
-    personnage, arrivee, obstacles = afficher_labyrinthe(zone, labyrinthe, modele_personnage, modele_arrivee, modele_obstacle, modele_sol)
+    robot, vaisseau, rochers = afficher_labyrinthe(zone, labyrinthe, modele_robot, modele_vaisseau, modele_rocher, modele_sol)
 
     # Chemin de la solution optimale
     montrer_solution = false
     points_solution = Observable(Point3f[])
     lines!(zone, points_solution, color=:cyan, linewidth=5)
-
+affichage_3D() = affichage_3D(10, 10, Modele_affichage(); retour_menu = nothing)
 
     # Afficher les coups et vérifier la victoire et la solution
     function actualiser!()
@@ -190,7 +190,7 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
     end
 
 
-    #Déplacer le personnage
+    #Déplacer le robot
     function deplacer!(direction)
         if direction == "" || etat.victoire
             return
@@ -206,24 +206,24 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
         etat.position = (ligne, colonne)
         etat.coups += 1
 
-        # Tourner/Rotation du personnage en fct de la direction
+        # Tourner/Rotation du robot en fct de la direction
         if direction == "H"
-            rotate!(personnage, Vec3f(0,0,1), 0)
+            rotate!(robot, Vec3f(0,0,1), 0)
         elseif direction == "A"
-            rotate!(personnage, Vec3f(0,0,1), -pi/2)
+            rotate!(robot, Vec3f(0,0,1), -pi/2)
         elseif direction == "B"
-            rotate!(personnage, Vec3f(0,0,1), pi)
+            rotate!(robot, Vec3f(0,0,1), pi)
         elseif direction == "R"
-            rotate!(personnage, Vec3f(0,0,1), pi/2)
+            rotate!(robot, Vec3f(0,0,1), pi/2)
         end
 
-        translate!(personnage, colonne, -ligne, 0.04)
+        translate!(robot, colonne, -ligne, 0.04)
 
-        # Le personnage disparaît à la sortie
+        # Le robot disparaît à la sortie
         L, C = size(labyrinthe)
         if ligne == L-1 && colonne == C-1
             etat.victoire = true
-            personnage.visible[] = false
+            robot.visible[] = false
         end
 
         actualiser!()
@@ -284,20 +284,22 @@ function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_
         montrer_solution = false
         optimal = coups_optimaux(labyrinthe, (2, 2), (2*lignes, 2*colonnes))
 
-        # Replacer les obstacles
+        # Replacer les rochers
         L, C = size(labyrinthe)
         numero = 1
-        for ligne in 1:L, colonne in 1:C
-            if labyrinthe[ligne, colonne] == 1
-                translate!(obstacles[numero], colonne, -ligne, 0.02)
-                numero += 1
+        for ligne in 1:L
+            for colonne in 1:C
+                if labyrinthe[ligne, colonne] == 1
+                    translate!(rochers[numero], colonne, -ligne, 0.02)
+                    numero += 1
+                end
             end
         end
 
-        # Remettre le personnage au départ
-        translate!(personnage, 2, -2, 0.04)
-        rotate!(personnage, Vec3f(0,0,1), 0)
-        personnage.visible[] = true
+        # Remettre le robot au départ
+        translate!(robot, 2, -2, 0.04)
+        rotate!(robot, Vec3f(0,0,1), 0)
+        robot.visible[] = true
 
         cadrer!()
         actualiser!()
