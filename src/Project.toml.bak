@@ -1,5 +1,0 @@
-[deps]
-Labyrinthe = "7883e5b6-2d73-4142-8c3a-49b4ce821969"
-
-[sources]
-Labyrinthe = {path = "/home/hannah/cqls/Labyrinthe.jl-main/Labyrinthe.jl-main"}
