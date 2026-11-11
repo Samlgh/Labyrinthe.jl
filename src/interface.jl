@@ -1,111 +1,100 @@
 using FileIO, MeshIO, WGLMakie, Bonito, GeometryBasics
 using WGLMakie.Makie: Button
-using FileIO, MeshIO, WGLMakie, Bonito, GeometryBasics
-using WGLMakie.Makie: Button
 
 # Charger les modèles 3D avec leurs coordonnées de texture
-function loadmodel(chemin::AbstractString)
-    model = load(chemin; uvtype=Vec2f)
-    return GeometryBasics.expand_faceviews(model)
-end
-
-Base.@kwdef struct Modele_affichage # Base.@kwdef permet d'affecter les valeur sans respect l'ordre 
-    titre::String
-    chara::String
-    exit::String
-    obst::String
-    ground::String
-    fond::String
-    col_txt::String
+function charger_modele(chemin)
+    modele = load(chemin; uvtype=Vec2f)
+    return GeometryBasics.expand_faceviews(modele)
 end
 
 # Dossier des modèles 3D
-const MODELS = normpath(joinpath(@__DIR__, "..", "models"))
-const TEXTURE= joinpath(MODELS, "mars", "textures")
+const dossier_models = normpath(joinpath(@__DIR__, "..", "models"))
+const dossier_textures = joinpath(dossier_models, "textures")
 
 Base.@kwdef struct Modele_affichage # Base.@kwdef permet d'affecter les valeur sans respect l'ordre 
     titre::String
-    chara::String
-    exit::String
-    obst::String
-    ground::String
-    fond::String
-    col_txt::String
+    modele_perso::String
+    modele_sorti::String
+    modele_obs::String
+    modele_sol::String
+    coul_texte::String
+    coul_fond::String
 end
 
 const MODES = Dict(
     "nono le robot" => Modele_affichage(
         titre = "MISSION MARS - Retour au vaisseau",
-        chara = joinpath(MODELS, "mars", "C1-10P_obj.obj"),
-        exit = joinpath(MODELS, "mars", "UFO.obj"),
-        obst = joinpath(MODELS, "mars", "Free_rock.obj"),
-        ground = joinpath(MODELS, "mars", "sol_mars.obj"),
-        fond = joinpath(MODELS, "fonds", "mars.png"),
-        col_txt = "#ffe4c2"),
+        modele_perso = joinpath(dossier_models, "C1-10P_obj.obj"),
+        modele_sorti = joinpath(dossier_models, "UFO.obj"),
+        modele_obs = joinpath(dossier_models, "Free_rock.obj"),
+        modele_sol = joinpath(dossier_models, "sol_mars.obj"),
+        coul_texte = "#ffe4c2", coul_fond = "#281914"),
 
     "sheep le mouton" => Modele_affichage(
-        titre = "LA FERME - Retour à la grange",
-        chara = joinpath(MODELS, "prairie", "Sheep.obj"),
-        exit = joinpath(MODELS, "prairie", "BigBarn.obj"),
-        obst = joinpath(MODELS, "prairie", "HayStack.obj"),
-        ground = joinpath(MODELS, "prairie", "sol_prairie.obj"),
-        fond = joinpath(MODELS, "fonds", "prairie.png"),
-        col_txt = "#E8F5D0"),
+        titre = "LA PRAIRIE - Retour à l'enclos",
+        modele_perso = joinpath(dossier_models, "C1-10P_obj.obj"),
+        modele_sorti = joinpath(dossier_models, "UFO.obj"),
+        modele_obs = joinpath(dossier_models, "Free_rock.obj"),
+        modele_sol = joinpath(dossier_models, "sol_mars.obj"),
+        coul_texte = "#E8F5D0", coul_fond = "#1B3A1B"),
 
     "carine la citadine" => Modele_affichage(
         titre = "LA VILLE - Retour à la maison",
-        chara = joinpath(MODELS, "ville", "voiture.obj"),
-        exit = joinpath(MODELS, "ville", "maison.obj"),
-        obst = joinpath(MODELS, "ville", "muret_ville.obj"),
-        ground = joinpath(MODELS, "ville", "sol_ville.obj"),
-        fond = joinpath(MODELS, "fonds", "ville.png"),
-        col_txt = "#D6E4F5"),
+        modele_perso = joinpath(dossier_models, "C1-10P_obj.obj"),
+        modele_sorti = joinpath(dossier_models, "UFO.obj"),
+        modele_obs = joinpath(dossier_models, "Free_rock.obj"),
+        modele_sol = joinpath(dossier_models, "sol_mars.obj"),
+        coul_texte = "#D6E4F5", coul_fond = "#1E2A3A"),
 )
 
-const keymap = Dict(
+const touche_clavier = Dict(
     Keyboard.up => "H",
     Keyboard.down => "B",
     Keyboard.left => "R",
     Keyboard.right => "A",
 )
-const Mod = Union{GeometryBasics.Mesh, GeometryBasics.MetaMesh}
-function view(lscene :: LScene, maze:: AbstractMatrix{<:Integer}, charmodel :: Mod ,exitmodel::Mod, obstmodel:: Mod , groundmodel::Mod)
+
+
+function afficher_labyrinthe(zone, labyrinthe, modele_robot, modele_vaisseau, modele_rocher, modele_sol)
     # Effacer les dessins de la partie précédente
-    for dessin in copy(lscene.scene.plots)
-        delete!(lscene, dessin)
+    for dessin in copy(zone.scene.plots)
+        delete!(zone, dessin)
     end
-    L, C = size(maze)
+    L, C = size(labyrinthe)
 
-    # Le ground du maze
-    ground = mesh!(lscene, groundmodel)
-    scale!(ground, C+1, L+1, 1)
-    translate!(ground, 0, -L-1, -0.02)
+    # Le sol du labyrinthe
+    sol = mesh!(zone, modele_sol)
+    scale!(sol, C+1, L+1, 1)
+    translate!(sol, 0, -L-1, -0.02)
 
-    obstacles = []
-    for row in 1:L, col in 1:C
-        if maze[row, col] == 1
-            obs = mesh!(lscene, obstmodel)     # modèle (obstmodel) -> dessin (obs)
-            scale!(obs, 1, 1, 3)
-            translate!(obs, col, -row, 0.02)
-            push!(obstacles, obs)
+    # Afficher les rochers avec leurs textures
+    rochers = []
+    for ligne in 1:L
+        for colonne in 1:C
+            if labyrinthe[ligne, colonne] == 1
+                rocher = mesh!(zone, modele_rocher)
+                scale!(rocher, 1, 1, 3)
+                translate!(rocher, colonne, -ligne, 0.02)
+                push!(rochers, rocher)
+            end
         end
     end
 
-    goal = mesh!(lscene, exitmodel)
-    translate!(goal, C-1, -(L-1), 0.16)
-    player = mesh!(lscene, charmodel)
-    translate!(player, 2, -2, 0.04)
-    center!(lscene.scene, 0.06)
+    vaisseau = mesh!(zone, modele_vaisseau)
+    translate!(vaisseau, C-1, -(L-1), 0.16)
+    robot = mesh!(zone, modele_robot)
+    translate!(robot, 2, -2, 0.04)
+    center!(zone.scene, 0.06)
 
-    return player, goal, obstacles
+    return robot, vaisseau, rochers
 end
 
-# Faire fonctionner les touches du clavier pour le déplacement du player
-function bind!(callback::Function, fig:: Figure)
+# Faire fonctionner les touches du clavier pour le déplacement du robot
+function brancher_clavier!(quand_direction, fig)
     on(events(fig).keyboardbutton; priority=10) do event
-        if haskey(keymap, event.key)
+        if haskey(touche_clavier, event.key)
             if event.action == Keyboard.press
-                callback(keymap[event.key])
+                quand_direction(touche_clavier[event.key])
             end
             return Consume(true)
         end
@@ -113,40 +102,41 @@ function bind!(callback::Function, fig:: Figure)
     end
 end
 
-function view(rows::Int, cols::Int, theme::Modele_affichage; back=nothing) 
-    if rows < 2 || cols < 2 || rows > 20 || cols > 20
-        error("Choisissez entre 2 et 20 rows et cols.")
+
+function affichage_3D(lignes::Int, colonnes::Int, aff::Modele_affichage; retour_menu=nothing)
+    if lignes < 2 || colonnes < 2 || lignes > 20 || colonnes > 20
+        error("Choisissez entre 2 et 20 lignes et colonnes.")
     end
 
     WGLMakie.activate!(; use_html_widgets=false)
 
-    charannage = loadmodel(theme.chara)
-    exitmodel = loadmodel(theme.exit)
-    obstmodel = loadmodel(theme.obst)
-    ground = loadmodel(theme.ground)
+    modele_robot = charger_modele(aff.modele_perso)
+    modele_vaisseau = charger_modele(aff.modele_sorti)
+    modele_rocher = charger_modele(aff.modele_obs)
+    modele_sol = charger_modele(aff.modele_sol)
 
     # La map et tous les boutons
     police = WGLMakie.Makie.assetpath("fonts", "NotoSans-Regular.ttf")
-    fig = Figure(size=(1100, 800), backgroundcolor=:transparent, fonts=(regular=police,))
+    fig = Figure(size=(1100, 800), backgroundcolor=aff.coul_fond, fonts=(regular=police,))
 
     haut = GridLayout(fig[1, 0:4])
-    Label(haut[1, 1:2], theme.titre, fontsize=28, color=theme.col_txt)
+    Label(haut[1, 1:2], aff.titre, fontsize=28, color=aff.coul_texte)
     menu = Button(haut[2, 1], label="Retour au menu", buttoncolor="#d6a477")
-    recenter = Button(haut[2, 2], label="recenter", buttoncolor="#d6a477")
+    cadrer = Button(haut[2, 2], label="Cadrer", buttoncolor="#d6a477")
 
-    lscene = LScene(fig[2, 1:3], show_axis=false)
-    cam3d!(lscene.scene, eyeposition=(0, -1, 2))
+    zone = LScene(fig[2, 1:3], show_axis=false)
+    cam3d!(zone.scene, eyeposition=(0, -1, 2))
 
     gauche = GridLayout(fig[2, 0], height=260, valign=:center)
-    Label(gauche[1, 1], "Nombre de coups", color=theme.col_txt, fontsize=17)
+    Label(gauche[1, 1], "Nombre de coups", color=aff.coul_texte, fontsize=17)
     score = Label(gauche[2, 1], "0", color="#d6a477", fontsize=32)
-    Label(gauche[3, 1], "Nb. coups min", color=theme.col_txt, fontsize=17)
-    bestlabel = Label(gauche[4, 1], "0", color="#d6a477", fontsize=32)
+    Label(gauche[3, 1], "Nb. coups min", color=aff.coul_texte, fontsize=17)
+    minimum = Label(gauche[4, 1], "0", color="#d6a477", fontsize=32)
     nouveau = Button(gauche[5, 1], label="Nouvelle partie", buttoncolor="#d6a477")
 
     droite = GridLayout(fig[2, 4], height=130, valign=:center)
-    hint = Button(droite[1, 1], label="hint +1", buttoncolor="#d6a477", height=42)
-    togglepath = Button(droite[2, 1], label="togglepath", buttoncolor="#d6a477", height=42)
+    indice = Button(droite[1, 1], label="Indice +1", buttoncolor="#d6a477", height=42)
+    solution = Button(droite[2, 1], label="Solution", buttoncolor="#d6a477", height=42)
 
     colsize!(fig.layout, 0, 155)
     colsize!(fig.layout, 4, 125)
@@ -154,24 +144,24 @@ function view(rows::Int, cols::Int, theme::Modele_affichage; back=nothing)
     rowsize!(fig.layout, 2, Auto(false))
 
     bas = GridLayout(fig[3, 0:4])
-    message = Label(bas[1, 1:5], "Rejoignez la sortie !", color=theme.col_txt, fontsize=18)
+    message = Label(bas[1, 1:5], "Rejoignez la sortie !", color=aff.coul_texte, fontsize=18)
     Label(bas[2, 1:5], "Déplacements : Avancer (→), Reculer (←), Haut (↑), Bas (↓) | Souris : tourner | Molette : zoomer", color=:white, fontsize=14)
 
-    maze = creer_lab(rows, cols)
+    labyrinthe = creer_lab(lignes, colonnes)
     etat = EtatJeu((2, 2), 0, false)
-    optimal = coups_optimaux(maze, (2, 2), (2*rows, 2*cols))
-    player, goal, obstacles = view(lscene, maze, charannage, exitmodel, obstmodel, ground)
+    optimal = coups_optimaux(labyrinthe, (2, 2), (2*lignes, 2*colonnes))
+    robot, vaisseau, rochers = afficher_labyrinthe(zone, labyrinthe, modele_robot, modele_vaisseau, modele_rocher, modele_sol)
 
-    # Chemin de la togglepath optimale
+    # Chemin de la solution optimale
     montrer_solution = false
     points_solution = Observable(Point3f[])
-    lines!(lscene, points_solution, color=:cyan, linewidth=5)
+    lines!(zone, points_solution, color=:cyan, linewidth=5)
+affichage_3D() = affichage_3D(10, 10, Modele_affichage(); retour_menu = nothing)
 
-
-    # Afficher les coups et vérifier la victoire et la togglepath
-    function refresh!()
+    # Afficher les coups et vérifier la victoire et la solution
+    function actualiser!()
         score.text[] = string(etat.coups)
-        bestlabel.text[] = string(optimal)
+        minimum.text[] = string(optimal)
 
         if etat.victoire
             message.text[] = "VICTOIRE ! Vous avez rejoint la sortie."
@@ -183,170 +173,172 @@ function view(rows::Int, cols::Int, theme::Modele_affichage; back=nothing)
         points = Point3f[]
 
         if montrer_solution
-            chemin = chemin_optimal(maze, etat.position, (2*rows, 2*cols))
+            chemin = chemin_optimal(labyrinthe, etat.position, (2*lignes, 2*colonnes))
 
-            for (row, col) in chemin
-                push!(points, Point3f(col, -row, 0.06))
+            for (ligne, colonne) in chemin
+                push!(points, Point3f(colonne, -ligne, 0.06))
             end
         end
 
         points_solution[] = points
 
         if montrer_solution
-            togglepath.label[] = "Masquer"
+            solution.label[] = "Masquer"
         else
-            togglepath.label[] = "togglepath"
+            solution.label[] = "Solution"
         end
     end
 
 
-    #Déplacer le player
-    function move!(direction)
+    #Déplacer le robot
+    function deplacer!(direction)
         if direction == "" || etat.victoire
             return
         end
 
         ancienne_position = etat.position
-        maze, row, col = deplacement!(etat.position, maze, direction)
+        labyrinthe, ligne, colonne = deplacement!(etat.position, labyrinthe, direction)
 
-        if (row, col) == ancienne_position
+        if (ligne, colonne) == ancienne_position
             return
         end
 
-        etat.position = (row, col)
+        etat.position = (ligne, colonne)
         etat.coups += 1
 
-        # Tourner/Rotation du player en fct de la direction
+        # Tourner/Rotation du robot en fct de la direction
         if direction == "H"
-            rotate!(player, Vec3f(0,0,1), 0)
+            rotate!(robot, Vec3f(0,0,1), 0)
         elseif direction == "A"
-            rotate!(player, Vec3f(0,0,1), -pi/2)
+            rotate!(robot, Vec3f(0,0,1), -pi/2)
         elseif direction == "B"
-            rotate!(player, Vec3f(0,0,1), pi)
+            rotate!(robot, Vec3f(0,0,1), pi)
         elseif direction == "R"
-            rotate!(player, Vec3f(0,0,1), pi/2)
+            rotate!(robot, Vec3f(0,0,1), pi/2)
         end
 
-        translate!(player, col, -row, 0.04)
+        translate!(robot, colonne, -ligne, 0.04)
 
-        # Le player disparaît à la sortie
-        L, C = size(maze)
-        if row == L-1 && col == C-1
+        # Le robot disparaît à la sortie
+        L, C = size(labyrinthe)
+        if ligne == L-1 && colonne == C-1
             etat.victoire = true
-            player.visible[] = false
+            robot.visible[] = false
         end
 
-        refresh!()
+        actualiser!()
     end
 
 
-    # Avancer d'une case avec hint +1
-    function hint!()
+    # Avancer d'une case avec Indice +1
+    function indice!()
         if etat.victoire
             return
         end
 
-        chemin = chemin_optimal(maze, etat.position, (2*rows, 2*cols))
+        chemin = chemin_optimal(labyrinthe, etat.position, (2*lignes, 2*colonnes))
 
         if length(chemin) < 2
             return
         end
 
-        row, col = etat.position
+        ligne, colonne = etat.position
         prochaine_ligne, prochaine_colonne = chemin[2]
 
-        if prochaine_ligne < row
-            move!("H")
-        elseif prochaine_ligne > row
-            move!("B")
-        elseif prochaine_colonne < col
-            move!("R")
+        if prochaine_ligne < ligne
+            deplacer!("H")
+        elseif prochaine_ligne > ligne
+            deplacer!("B")
+        elseif prochaine_colonne < colonne
+            deplacer!("R")
         else
-            move!("A")
+            deplacer!("A")
         end
     end
 
 
-    # Afficher ou masquer la togglepath
-    function togglepath!()
+    # Afficher ou masquer la solution
+    function solution!()
         if etat.victoire
             return
         end
 
         montrer_solution = !montrer_solution
-        refresh!()
+        actualiser!()
     end
 
 
     # On remet la caméra au départ
-    function recenter!()
-        cam3d!(lscene.scene, eyeposition=(0, -1, 2))
-        center!(lscene.scene, 0.06)
+    function cadrer!()
+        cam3d!(zone.scene, eyeposition=(0, -1, 2))
+        center!(zone.scene, 0.06)
     end
 
 
-    # Nouveau maze
-    function restart!()
-        maze = creer_lab(rows, cols)
+    # Nouveau labyrinthe
+    function nouvelle_partie!()
+        labyrinthe = creer_lab(lignes, colonnes)
         etat.position = (2, 2)
         etat.coups = 0
         etat.victoire = false
         montrer_solution = false
-        optimal = coups_optimaux(maze, (2, 2), (2*rows, 2*cols))
+        optimal = coups_optimaux(labyrinthe, (2, 2), (2*lignes, 2*colonnes))
 
-        # Replacer les obstacles
-        L, C = size(maze)
+        # Replacer les rochers
+        L, C = size(labyrinthe)
         numero = 1
-        for row in 1:L, col in 1:C
-            if maze[row, col] == 1
-                translate!(obstacles[numero], col, -row, 0.02)
-                numero += 1
+        for ligne in 1:L
+            for colonne in 1:C
+                if labyrinthe[ligne, colonne] == 1
+                    translate!(rochers[numero], colonne, -ligne, 0.02)
+                    numero += 1
+                end
             end
         end
 
-        # Remettre le player au départ
-        translate!(player, 2, -2, 0.04)
-        rotate!(player, Vec3f(0,0,1), 0)
-        player.visible[] = true
+        # Remettre le robot au départ
+        translate!(robot, 2, -2, 0.04)
+        rotate!(robot, Vec3f(0,0,1), 0)
+        robot.visible[] = true
 
-        recenter!()
-        refresh!()
+        cadrer!()
+        actualiser!()
     end
 
 
     #Retourne à l'accueil
-    function home!()
-        if back !== nothing
-            back()
+    function revenir_menu!()
+        if retour_menu !== nothing
+            retour_menu()
         else
             message.text[] = "Le menu n'est pas encore relié."
         end
     end
 
     # Relie les boutons
-    on(recenter.clicks) do _
-        recenter!()
+    on(cadrer.clicks) do _
+        cadrer!()
     end
 
     on(nouveau.clicks) do _
-        restart!()
+        nouvelle_partie!()
     end
 
     on(menu.clicks) do _
-        home!()
+        revenir_menu!()
     end
 
-    on(hint.clicks) do _
-        hint!()
+    on(indice.clicks) do _
+        indice!()
     end
 
-    on(togglepath.clicks) do _
-        togglepath!()
+    on(solution.clicks) do _
+        solution!()
     end
 
-    bind!(move!, fig)
+    brancher_clavier!(deplacer!, fig)
 
-    refresh!()
+    actualiser!()
 
     return fig
 end
