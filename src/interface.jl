@@ -1,7 +1,5 @@
 using FileIO, MeshIO, WGLMakie, Bonito, GeometryBasics
 using WGLMakie.Makie: Button
-using FileIO, MeshIO, WGLMakie, Bonito, GeometryBasics
-using WGLMakie.Makie: Button
 
 # Charger les modèles 3D avec leurs coordonnées de texture
 function loadmodel(path::AbstractString)
@@ -9,92 +7,82 @@ function loadmodel(path::AbstractString)
     return GeometryBasics.expand_faceviews(model)
 end
 
-Base.@kwdef struct Modele_affichage # Base.@kwdef permet d'affecter les valeur sans respect l'ordre 
-    titre::String
-    chara::String
-    exit::String
-    obst::String
-    ground::String
-    fond::String
-    col_txt::String
-end
-
 # Dossier des modèles 3D
 const MODELS = normpath(joinpath(@__DIR__, "..", "models"))
-const TEXTURE= joinpath(MODELS, "mars", "textures")
+const TEXTURE = joinpath(MODELS, "mars", "textures")
 
-Base.@kwdef struct Modele_affichage # Base.@kwdef permet d'affecter les valeur sans respect l'ordre 
-    titre::String
-    chara::String
+Base.@kwdef struct DisplayTheme # Base.@kwdef permet d'affecter les valeurs sans respecter l'ordre
+    title::String
+    character::String
     exit::String
-    obst::String
+    obstacle::String
     ground::String
-    fond::String
-    col_txt::String
+    background::String
+    textcolor::String
 end
 
 const MODES = Dict(
-    "nono le robot" => Modele_affichage(
-        titre = "MISSION MARS - Retour au vaisseau",
-        chara = joinpath(MODELS, "mars", "C1-10P_obj.obj"),
+    "nono le robot" => DisplayTheme(
+        title = "MISSION MARS - Retour au vaisseau",
+        character = joinpath(MODELS, "mars", "C1-10P_obj.obj"),
         exit = joinpath(MODELS, "mars", "UFO.obj"),
-        obst = joinpath(MODELS, "mars", "Free_rock.obj"),
+        obstacle = joinpath(MODELS, "mars", "Free_rock.obj"),
         ground = joinpath(MODELS, "mars", "sol_mars.obj"),
-        fond = joinpath(MODELS, "fonds", "mars.png"),
-        col_txt = "#ffe4c2"),
+        background = joinpath(MODELS, "fonds", "mars.png"),
+        textcolor = "#ffe4c2"),
 
-    "sheep le mouton" => Modele_affichage(
-        titre = "LA FERME - Retour à la grange",
-        chara = joinpath(MODELS, "prairie", "Sheep.obj"),
+    "sheep le mouton" => DisplayTheme(
+        title = "LA FERME - Retour à la grange",
+        character = joinpath(MODELS, "prairie", "Sheep.obj"),
         exit = joinpath(MODELS, "prairie", "BigBarn.obj"),
-        obst = joinpath(MODELS, "prairie", "HayStack.obj"),
+        obstacle = joinpath(MODELS, "prairie", "HayStack.obj"),
         ground = joinpath(MODELS, "prairie", "sol_prairie.obj"),
-        fond = joinpath(MODELS, "fonds", "prairie.png"),
-        col_txt = "#E8F5D0"),
+        background = joinpath(MODELS, "fonds", "prairie.png"),
+        textcolor = "#E8F5D0"),
 
-    "carine la citadine" => Modele_affichage(
-        titre = "LA VILLE - Retour à la maison",
-        chara = joinpath(MODELS, "ville", "voiture.obj"),
+    "carine la citadine" => DisplayTheme(
+        title = "LA VILLE - Retour à la maison",
+        character = joinpath(MODELS, "ville", "voiture.obj"),
         exit = joinpath(MODELS, "ville", "maison.obj"),
-        obst = joinpath(MODELS, "ville", "muret_ville.obj"),
+        obstacle = joinpath(MODELS, "ville", "muret_ville.obj"),
         ground = joinpath(MODELS, "ville", "sol_ville.obj"),
-        fond = joinpath(MODELS, "fonds", "ville.png"),
-        col_txt = "#D6E4F5"),
+        background = joinpath(MODELS, "fonds", "ville.png"),
+        textcolor = "#D6E4F5"),
 )
 
-const keymap = Dict(
-    Keyboard.up => "H",
-    Keyboard.down => "B",
-    Keyboard.left => "R",
-    Keyboard.right => "A",
+const KEYMAP = Dict(
+    Keyboard.up => :up,
+    Keyboard.down => :down,
+    Keyboard.left => :left,
+    Keyboard.right => :right,
 )
 
-const Mod = Union{GeometryBasics.Mesh, GeometryBasics.MetaMesh}
+const MeshModel = Union{GeometryBasics.Mesh, GeometryBasics.MetaMesh}
 
-function view(lscene :: LScene, grid:: AbstractMatrix{<:Integer}, charmodel :: Mod ,exitmodel::Mod, obstmodel:: Mod , groundmodel::Mod)
+function view(lscene::LScene, grid::AbstractMatrix{<:Integer}, charmodel::MeshModel, exitmodel::MeshModel, obstaclemodel::MeshModel, groundmodel::MeshModel)
     # Effacer les dessins de la partie précédente
-    for dessin in copy(lscene.scene.plots)
-        delete!(lscene, dessin)
+    for drawing in copy(lscene.scene.plots)
+        delete!(lscene, drawing)
     end
-    L, C = size(grid)
+    nrows, ncols = size(grid)
 
     # Le sol du labyrinthe
     ground = mesh!(lscene, groundmodel)
-    scale!(ground, C+1, L+1, 1)
-    translate!(ground, 0, -L-1, -0.02)
+    scale!(ground, ncols+1, nrows+1, 1)
+    translate!(ground, 0, -nrows-1, -0.02)
 
     obstacles = []
-    for row in 1:L, col in 1:C
+    for row in 1:nrows, col in 1:ncols
         if grid[row, col] == 1
-            obs = mesh!(lscene, obstmodel)     # modèle (obstmodel) -> dessin (obs)
-            scale!(obs, 1, 1, 3)
-            translate!(obs, col, -row, 0.02)
-            push!(obstacles, obs)
+            obstacle = mesh!(lscene, obstaclemodel)     # modèle (obstaclemodel) -> dessin (obstacle)
+            scale!(obstacle, 1, 1, 3)
+            translate!(obstacle, col, -row, 0.02)
+            push!(obstacles, obstacle)
         end
     end
 
     goal = mesh!(lscene, exitmodel)
-    translate!(goal, C-1, -(L-1), 0.16)
+    translate!(goal, ncols-1, -(nrows-1), 0.16)
     player = mesh!(lscene, charmodel)
     translate!(player, 2, -2, 0.04)
     center!(lscene.scene, 0.06)
@@ -103,11 +91,11 @@ function view(lscene :: LScene, grid:: AbstractMatrix{<:Integer}, charmodel :: M
 end
 
 # Faire fonctionner les touches du clavier pour le déplacement du player
-function bind!(callback::Function, fig:: Figure)
+function bind!(callback::Function, fig::Figure)
     on(events(fig).keyboardbutton; priority=10) do event
-        if haskey(keymap, event.key)
+        if haskey(KEYMAP, event.key)
             if event.action == Keyboard.press
-                callback(keymap[event.key])
+                callback(KEYMAP[event.key])
             end
             return Consume(true)
         end
@@ -115,125 +103,125 @@ function bind!(callback::Function, fig:: Figure)
     end
 end
 
-function view(rows::Int, cols::Int, theme::Modele_affichage; back=nothing) 
+function view(rows::Int, cols::Int, theme::DisplayTheme; back=nothing)
     if rows < 2 || cols < 2 || rows > 20 || cols > 20
         error("Choisissez entre 2 et 20 rows et cols.")
     end
 
     WGLMakie.activate!(; use_html_widgets=false)
 
-    charannage = loadmodel(theme.chara)
+    charmodel = loadmodel(theme.character)
     exitmodel = loadmodel(theme.exit)
-    obstmodel = loadmodel(theme.obst)
-    ground = loadmodel(theme.ground)
+    obstaclemodel = loadmodel(theme.obstacle)
+    groundmodel = loadmodel(theme.ground)
 
     # La map et tous les boutons
-    police = WGLMakie.Makie.assetpath("fonts", "NotoSans-Regular.ttf")
-    fig = Figure(size=(1100, 800), backgroundcolor=:transparent, fonts=(regular=police,))
+    fontpath = WGLMakie.Makie.assetpath("fonts", "NotoSans-Regular.ttf")
+    fig = Figure(size=(1100, 800), backgroundcolor=:transparent, fonts=(regular=fontpath,))
 
-    high = GridLayout(fig[1, 0:4])
-    Label(high[1, 1:2], theme.titre, fontsize=28, color=theme.col_txt)
-    menu = Button(high[2, 1], label="Retour au menu", buttoncolor="#d6a477")
-    refocus = Button(high[2, 2], label="recenter", buttoncolor="#d6a477")
+    toplayout = GridLayout(fig[1, 0:4])
+    Label(toplayout[1, 1:2], theme.title, fontsize=28, color=theme.textcolor)
+    menubutton = Button(toplayout[2, 1], label="Retour au menu", buttoncolor="#d6a477")
+    recenterbutton = Button(toplayout[2, 2], label="recenter", buttoncolor="#d6a477")
 
     lscene = LScene(fig[2, 1:3], show_axis=false)
     cam3d!(lscene.scene, eyeposition=(0, -1, 2))
 
-    left = GridLayout(fig[2, 0], height=260, valign=:center)
-    Label(left[1, 1], "Nombre de coups", color=theme.col_txt, fontsize=17)
-    score = Label(left[2, 1], "0", color="#d6a477", fontsize=32)
-    Label(left[3, 1], "Nb. coups min", color=theme.col_txt, fontsize=17)
-    bestlabel = Label(left[4, 1], "0", color="#d6a477", fontsize=32)
-    nouveau = Button(left[5, 1], label="Nouvelle partie", buttoncolor="#d6a477")
+    leftlayout = GridLayout(fig[2, 0], height=260, valign=:center)
+    Label(leftlayout[1, 1], "Nombre de coups", color=theme.textcolor, fontsize=17)
+    movelabel = Label(leftlayout[2, 1], "0", color="#d6a477", fontsize=32)
+    Label(leftlayout[3, 1], "Nb. coups min", color=theme.textcolor, fontsize=17)
+    bestlabel = Label(leftlayout[4, 1], "0", color="#d6a477", fontsize=32)
+    newgamebutton = Button(leftlayout[5, 1], label="Nouvelle partie", buttoncolor="#d6a477")
 
-    right = GridLayout(fig[2, 4], height=130, valign=:center)
-    hint = Button(right[1, 1], label="Indice +1", buttoncolor="#d6a477", height=42)
-    togglepath = Button(right[2, 1], label="Solution", buttoncolor="#d6a477", height=42)
+    rightlayout = GridLayout(fig[2, 4], height=130, valign=:center)
+    hintbutton = Button(rightlayout[1, 1], label="Indice +1", buttoncolor="#d6a477", height=42)
+    pathbutton = Button(rightlayout[2, 1], label="Solution", buttoncolor="#d6a477", height=42)
 
     colsize!(fig.layout, 0, 155)
     colsize!(fig.layout, 4, 125)
     colgap!(fig.layout, 12)
     rowsize!(fig.layout, 2, Auto(false))
 
-    down = GridLayout(fig[3, 0:4])
-    message = Label(down[1, 1:5], "Rejoignez la sortie !", color=theme.col_txt, fontsize=18)
-    Label(down[2, 1:5], "Déplacements : Avancer (→), Reculer (←), Haut (↑), Bas (↓) | Souris : tourner | Molette : zoomer", color=:white, fontsize=14)
+    bottomlayout = GridLayout(fig[3, 0:4])
+    message = Label(bottomlayout[1, 1:5], "Rejoignez la sortie !", color=theme.textcolor, fontsize=18)
+    Label(bottomlayout[2, 1:5], "Déplacements : Avancer (→), Reculer (←), Haut (↑), Bas (↓) | Souris : tourner | Molette : zoomer", color=:white, fontsize=14)
 
-    lab = Lab(rows, cols)
-    etat = GameState((2, 2), 0, false)
-    optimal = coups_optimaux(lab.grid, (2, 2), (2*lab.rows, 2*lab.cols))
-    player, goal, obstacles = view(lscene, lab.grid, charannage, exitmodel, obstmodel, ground)
+    maze = Maze(rows, cols)
+    state = GameState((2, 2), 0, false)
+    bestmoves = optimalmoves(maze.grid, (2, 2), (2*maze.rows, 2*maze.cols))
+    player, goal, obstacles = view(lscene, maze.grid, charmodel, exitmodel, obstaclemodel, groundmodel)
 
-    # Chemin de la togglepath optimale
-    viewsol = false
-    pointssolution = Observable(Point3f[])
-    lines!(lscene, pointssolution, color=:cyan, linewidth=5)
+    # Chemin optimal affiché par le bouton solution
+    showpath = false
+    pathpoints = Observable(Point3f[])
+    lines!(lscene, pathpoints, color=:cyan, linewidth=5)
 
 
-    # Afficher les coups et vérifier la victoire et la togglepath
+    # Afficher les coups et vérifier la victoire et le chemin
     function refresh!()
-        score.text[] = string(etat.moves)
-        bestlabel.text[] = string(optimal)
+        movelabel.text[] = string(state.moves)
+        bestlabel.text[] = string(bestmoves)
 
-        if etat.win
+        if state.win
             message.text[] = "VICTOIRE ! Vous avez rejoint la sortie."
-            viewsol = false
+            showpath = false
         else
             message.text[] = "Rejoignez la sortie !"
         end
 
         points = Point3f[]
 
-        if viewsol
-            path = chemin_optimal(lab.grid, etat.position, (2*rows, 2*cols))
+        if showpath
+            path = optimalpath(maze.grid, state.position, (2*maze.rows, 2*maze.cols))
 
             for (row, col) in path
                 push!(points, Point3f(col, -row, 0.06))
             end
         end
 
-        pointssolution[] = points
+        pathpoints[] = points
 
-        if viewsol
-            togglepath.label[] = "Masquer"
+        if showpath
+            pathbutton.label[] = "Masquer"
         else
-            togglepath.label[] = "Solution"
+            pathbutton.label[] = "Solution"
         end
     end
 
 
-    #Déplacer le player
-    function move!(direction)
-        if direction == "" || etat.win
+    # Déplacer le player
+    function move!(direction::Symbol)
+        if state.win
             return
         end
 
-        previous_position = etat.position
-        lab.grid, row, col = deplacement!(etat.position, lab.grid, direction)
+        previous_position = state.position
+        row, col = applymove!(maze.grid, state.position, direction)
 
         if (row, col) == previous_position
             return
         end
 
-        etat.position = (row, col)
-        etat.moves += 1
+        state.position = (row, col)
+        state.moves += 1
 
         # Tourner/Rotation du player en fct de la direction
-        if direction == "H"
+        if direction == :up
             rotate!(player, Vec3f(0,0,1), 0)
-        elseif direction == "A"
+        elseif direction == :right
             rotate!(player, Vec3f(0,0,1), -pi/2)
-        elseif direction == "B"
+        elseif direction == :down
             rotate!(player, Vec3f(0,0,1), pi)
-        elseif direction == "R"
+        elseif direction == :left
             rotate!(player, Vec3f(0,0,1), pi/2)
         end
 
         translate!(player, col, -row, 0.04)
 
         # Le player disparaît à la sortie
-        if row == lab.rows -1 && col == lab.n_cols-1
-            etat.win = true
+        if row == 2*maze.rows && col == 2*maze.cols
+            state.win = true
             player.visible[] = false
         end
 
@@ -241,66 +229,67 @@ function view(rows::Int, cols::Int, theme::Modele_affichage; back=nothing)
     end
 
 
-    # Avancer d'une case avec hint +1
+    # Avancer d'une case avec l'indice +1
     function hint!()
-        if etat.win
+        if state.win
             return
         end
 
-        path = chemin_optimal(lab.grid, etat.position, (2*lab.rows, 2*lab.cols))
+        path = optimalpath(maze.grid, state.position, (2*maze.rows, 2*maze.cols))
 
         if length(path) < 2
             return
         end
 
-        row, col = etat.position
-        prochaine_ligne, prochaine_colonne = path[2]
+        row, col = state.position
+        nextrow, nextcol = path[2]
 
-        if prochaine_ligne < row
-            move!("H")
-        elseif prochaine_ligne > row
-            move!("B")
-        elseif prochaine_colonne < col
-            move!("R")
+        if nextrow < row
+            move!(:up)
+        elseif nextrow > row
+            move!(:down)
+        elseif nextcol < col
+            move!(:left)
         else
-            move!("A")
+            move!(:right)
         end
     end
 
 
-    # Afficher ou masquer la togglepath
+    # Afficher ou masquer le chemin
     function togglepath!()
-        if etat.win
+        if state.win
             return
         end
 
-        viewsol = !viewsol
+        showpath = !showpath
         refresh!()
     end
 
 
     # On remet la caméra au départ
-    function refocus!()
+    function recenter!()
         cam3d!(lscene.scene, eyeposition=(0, -1, 2))
         center!(lscene.scene, 0.06)
     end
 
 
-    # Nouveau Labyrinte
+    # Nouveau labyrinthe
     function restart!()
-        lab.grid = creer_lab(lab.rows, lab.cols)
-        etat.position = (2, 2)
-        etat.coups = 0
-        etat.win = false
-        viewsol = false
-        optimal = coups_optimaux(lab.grid, (2, 2), (2*lab.rows, 2*lab.cols))
+        maze.grid = generategrid(maze.rows, maze.cols)
+        state.position = (2, 2)
+        state.moves = 0
+        state.win = false
+        showpath = false
+        bestmoves = optimalmoves(maze.grid, (2, 2), (2*maze.rows, 2*maze.cols))
 
         # Replacer les obstacles
-        numero = 1
-        for row in 1:lab.rows, col in 1:lab.cols
-            if lab.grid[row, col] == 1
-                translate!(obstacles[numero], col, -row, 0.02)
-                numero += 1
+        nrows, ncols = size(maze.grid)
+        index = 1
+        for row in 1:nrows, col in 1:ncols
+            if maze.grid[row, col] == 1
+                translate!(obstacles[index], col, -row, 0.02)
+                index += 1
             end
         end
 
@@ -309,12 +298,12 @@ function view(rows::Int, cols::Int, theme::Modele_affichage; back=nothing)
         rotate!(player, Vec3f(0,0,1), 0)
         player.visible[] = true
 
-        refocus!()
+        recenter!()
         refresh!()
     end
 
 
-    #Retourne à l'accueil
+    # Retourne à l'accueil
     function home!()
         if back !== nothing
             back()
@@ -324,23 +313,23 @@ function view(rows::Int, cols::Int, theme::Modele_affichage; back=nothing)
     end
 
     # Relie les boutons
-    on(refocus.clicks) do _
-        refocus!()
+    on(recenterbutton.clicks) do _
+        recenter!()
     end
 
-    on(nouveau.clicks) do _
+    on(newgamebutton.clicks) do _
         restart!()
     end
 
-    on(menu.clicks) do _
+    on(menubutton.clicks) do _
         home!()
     end
 
-    on(hint.clicks) do _
+    on(hintbutton.clicks) do _
         hint!()
     end
 
-    on(togglepath.clicks) do _
+    on(pathbutton.clicks) do _
         togglepath!()
     end
 
