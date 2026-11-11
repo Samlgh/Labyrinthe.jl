@@ -82,4 +82,4 @@ Puis ouvrir le lien : **http://127.0.0.1:8766**.
 
 ## 7. Sources : Modèles 3d et png 
 
-- à compléter le Mardi 03/11
+- à mettre dans le rapport
