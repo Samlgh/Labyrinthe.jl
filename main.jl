@@ -6,7 +6,7 @@ using Bonito
 
 # Lancer le jeu sur le navigateur
 port = 8766
-serveur = Bonito.Server(mode_jeu(), "127.0.0.1", port)
+serveur = Bonito.Server(play(), "127.0.0.1", port)
 
 println("Ouvrez http://127.0.0.1:$port dans votre navigateur.")
 println("Ctrl+C pour arrêter le serveur.")
