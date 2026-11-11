@@ -20,43 +20,35 @@ end
 
 Maze(rows::Int, cols::Int) = Maze(rows, cols, generategrid(rows, cols))
 
-function isinside(rows::Int, cols::Int, R::Int, C::Int)
-    return rows < 1 || rows > L || cols < 1 || cols > C
+# Vrai si la case est hors de la grille
+function isoutside(row::Int, col::Int, nrows::Int, ncols::Int)
+    return row < 1 || row > nrows || col < 1 || col > ncols
 end
 
-function applymove!(position::Tuple{Int,Int}, grid::Matrix{Int}, direction::Char)
+# Déplace le joueur et renvoie sa nouvelle position
+function applymove!(grid::Matrix{Int}, position::Tuple{Int,Int}, direction::Symbol)
     row, col = position
-    L, C = size(grid)
+    nrows, ncols = size(grid)
 
     newrow = row
     newcol = col
 
-    direction = uppercase(strip(direction))
-
-    if direction == "H" # Haut
+    if direction == :up
         newrow -= 1
-    elseif direction == "B" # Bas
+    elseif direction == :down
         newrow += 1
-    elseif direction == "A" # Avancer
+    elseif direction == :right
         newcol += 1
-    elseif direction == "R" # Reculer
+    elseif direction == :left
         newcol -= 1
     else
-        println("Direction inconnue")
-        return grid, row, col
+        return row, col
     end
 
-    if isinside(newrow, newcol, L, C)
-        println("Pas possible : hors de la grille")
-        return grid, row, col
-        
+    if isoutside(newrow, newcol, nrows, ncols)
+        return row, col
     elseif grid[newrow, newcol] == 1
-        println("Pas possible : obstacle")
-        return grid, row, col
-    end
-
-    if grid[newrow, newcol] == 3
-        println("Bravo c'est la sortie !")
+        return row, col
     end
 
     grid[row, col] = 0
@@ -64,10 +56,8 @@ function applymove!(position::Tuple{Int,Int}, grid::Matrix{Int}, direction::Char
     if grid[newrow, newcol] != 3
         grid[newrow, newcol] = 2
     end
-    
-    return grid, newrow, newcol
+    return newrow, newcol
 end
-
 function generategrid(rows::Int, cols::Int)
     grid = ones(Int, 2rows + 1, 2cols + 1)
     sets = IntDisjointSet(rows * cols)
