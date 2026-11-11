@@ -6,113 +6,96 @@
 using DataStructures
 using Random
 
-mutable struct EtatJeu
+mutable struct GameState
     position::Tuple{Int, Int}
-    coups::Int
-    victoire::Bool
+    moves::Int
+    win::Bool
 end
 
-function grille(l, c)
-    return ones(Int, 2*l + 1, 2*c + 1)
+mutable struct Maze
+    rows::Int
+    cols::Int
+    grid::Matrix{Int}
 end
 
-function verif(ligne, colonne, L, C)
-    return ligne < 1 || ligne > L || colonne < 1 || colonne > C
+Maze(rows::Int, cols::Int) = Maze(rows, cols, generategrid(rows, cols))
+
+function isinside(rows::Int, cols::Int, R::Int, C::Int)
+    return rows < 1 || rows > L || cols < 1 || cols > C
 end
 
-function deplacement!(position, labyrinthe, direction)
-    ligne, colonne = position
-    L, C = size(labyrinthe)
+function applymove!(position::Tuple{Int,Int}, grid::Matrix{Int}, direction::Char)
+    row, col = position
+    L, C = size(grid)
 
-    nouvelle_ligne = ligne
-    nouvelle_colonne = colonne
+    newrow = row
+    newcol = col
 
     direction = uppercase(strip(direction))
 
     if direction == "H" # Haut
-        nouvelle_ligne -= 1
+        newrow -= 1
     elseif direction == "B" # Bas
-        nouvelle_ligne += 1
+        newrow += 1
     elseif direction == "A" # Avancer
-        nouvelle_colonne += 1
+        newcol += 1
     elseif direction == "R" # Reculer
-        nouvelle_colonne -= 1
+        newcol -= 1
     else
         println("Direction inconnue")
-        return labyrinthe, ligne, colonne
+        return grid, row, col
     end
 
-    if verif(nouvelle_ligne, nouvelle_colonne, L, C)
+    if isinside(newrow, newcol, L, C)
         println("Pas possible : hors de la grille")
-        return labyrinthe, ligne, colonne
+        return grid, row, col
         
-    elseif labyrinthe[nouvelle_ligne, nouvelle_colonne] == 1
+    elseif grid[newrow, newcol] == 1
         println("Pas possible : obstacle")
-        return labyrinthe, ligne, colonne
+        return grid, row, col
     end
 
-    if labyrinthe[nouvelle_ligne, nouvelle_colonne] == 3
+    if grid[newrow, newcol] == 3
         println("Bravo c'est la sortie !")
     end
 
-    labyrinthe[ligne, colonne] = 0
+    grid[row, col] = 0
 
-    if labyrinthe[nouvelle_ligne, nouvelle_colonne] != 3
-        labyrinthe[nouvelle_ligne, nouvelle_colonne] = 2
+    if grid[newrow, newcol] != 3
+        grid[newrow, newcol] = 2
     end
     
-    return labyrinthe, nouvelle_ligne, nouvelle_colonne
+    return grid, newrow, newcol
 end
 
+function generategrid(rows::Int, cols::Int)
+    grid = ones(Int, 2rows + 1, 2cols + 1)
+    sets = IntDisjointSet(rows * cols)
+    cellindex(x, y) = (y - 1) * cols + x
 
-function creer_lab(l, c)
-    labyrinthe = grille(l, c)
-    ensemble = IntDisjointSet(l * c)
-    index(x, y) = (y - 1) * c + x
-
-    for y in 1:l, x in 1:c
-        labyrinthe[2*y, 2*x] = 0
+    # Ouvrir toutes les cellules
+    for y in 1:rows, x in 1:cols
+        grid[2y, 2x] = 0
     end
 
-    murs = Tuple{Tuple{Int,Int},Tuple{Int,Int}}[]
-
-    for y in 1:l, x in 1:c
-        if x < c
-            push!(murs, ((x, y), (x + 1, y)))
-        end
-        if y < l
-            push!(murs, ((x, y), (x, y + 1)))
-        end
+    # Murs candidats entre cellules voisines
+    walls = Tuple{Tuple{Int,Int},Tuple{Int,Int}}[]
+    for y in 1:rows, x in 1:cols
+        x < cols && push!(walls, ((x, y), (x + 1, y)))
+        y < rows && push!(walls, ((x, y), (x, y + 1)))
     end
+    shuffle!(walls)
 
-    shuffle!(murs)
-
-    for ((x1, y1), (x2, y2)) in murs
-        i1 = index(x1, y1)
-        i2 = index(x2, y2)
-
-        if !in_same_set(ensemble, i1, i2)
-            union!(ensemble, i1, i2)
-            labyrinthe[y1 + y2, x1 + x2] = 0
+    # Casser un mur seulement s'il relie deux zones encore séparées
+    for ((x1, y1), (x2, y2)) in walls
+        i1, i2 = cellindex(x1, y1), cellindex(x2, y2)
+        if !in_same_set(sets, i1, i2)
+            union!(sets, i1, i2)
+            grid[y1 + y2, x1 + x2] = 0
         end
     end
 
-    # Joueur
-    labyrinthe[2, 2] = 2
-    
-    # Sortie
-    labyrinthe[2*l, 2*c] = 3
-
-    return labyrinthe
+    grid[2, 2] = 2
+    grid[2rows, 2cols] = 3
+    return grid
 end
-
-# struct Labyrinthe
-#     l::Int
-#     c::Int
-#     grid::Matrix{Int}
-
-#     function Labyrinthe(l::Int, c::Int)
-#         grid = ones(Int, 2l + 1, 2c + 1)
-#         return new(l,c,grid)
-#     end
-# end
