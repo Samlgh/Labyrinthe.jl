@@ -76,7 +76,7 @@ Puis ouvrir le lien : **http://127.0.0.1:8766**.
 - **EFFECTUER DES TESTS UNITAIRES** : commande pour lancer le fichier test : julia --project=.. test.jl
     
   
-Pour réaliser les tests unitaires, nous avons utilisé la macro @testset, qui permet de regrouper plusieurs tests (@test) par fonction. Chaque groupe est affiché avec son propre résumé (réussis, échoués, erreurs) et les tests continuent même si l’un d’eux échoue, ce qui permet d’identifier rapidement la fonction à corriger.
+Pour réaliser les tests unitaires, nous avons utilisé la macro @testset, qui permet de regrouper plusieurs tests (@test) par fonction. Chaque groupe est affiché avec son propre résumé (réussis, échoués, erreurs). 
 
 Maze : on test si les valeur rentre sont les bonne et si la taille du labyrinthe est la bonne 
 
@@ -94,7 +94,7 @@ Le labyrinthe étant généré de façon aléatoire à chaque appel de la foncti
  #### Samir :
 - **REDIGER LE RAPPORT HTML (avec Quarto ou un notebook Julia)**
 - **FAIRE LA PRESENTATION HTML (avec KaimonSlate ou BonitoBook)**
-- **Je t'ai mis les justification de comment les test unitaire on etait realiser juste au dessus**
+- **Tu trouvera si dessus les justification des test unitaire**
 
 
 ## 7. Sources : Modèles 3d et png 
