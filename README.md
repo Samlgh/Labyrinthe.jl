@@ -74,10 +74,17 @@ Puis ouvrir le lien : **http://127.0.0.1:8766**.
 
 #### Hannah
 - **EFFECTUER DES TESTS UNITAIRES**
+Pour réaliser les tests unitaires, nous avons utilisé la macro @testset, qui permet de regrouper plusieurs tests (@test) par fonction. Chaque groupe est affiché avec son propre résumé (réussis, échoués, erreurs) et les tests continuent même si l’un d’eux échoue, ce qui permet d’identifier rapidement la fonction à corriger.
+
+Generategrid : 
+Le labyrinthe étant généré de façon aléatoire à chaque appel de la fonction nous ne pouvons pas comparer son contenu à une valeur attendue. Nous testons donc ses propriétés : sa taille, sa bordure de murs et la position du joueur et de la sortie.
+
+
 
  #### Samir :
 - **REDIGER LE RAPPORT HTML (avec Quarto ou un notebook Julia)**
 - **FAIRE LA PRESENTATION HTML (avec KaimonSlate ou BonitoBook)**
+- **Je t'ai mis les justification de comment les test unitaire on etait realiser juste au dessus**
 
 
 ## 7. Sources : Modèles 3d et png 
