@@ -73,12 +73,21 @@ Puis ouvrir le lien : **http://127.0.0.1:8766**.
 ## 6. Ce qu'il reste à faire
 
 #### Hannah
-- **EFFECTUER DES TESTS UNITAIRES**
+- **EFFECTUER DES TESTS UNITAIRES** : commande pour lancer le fichier test : julia --project=.. test.jl
+    
   
 Pour réaliser les tests unitaires, nous avons utilisé la macro @testset, qui permet de regrouper plusieurs tests (@test) par fonction. Chaque groupe est affiché avec son propre résumé (réussis, échoués, erreurs) et les tests continuent même si l’un d’eux échoue, ce qui permet d’identifier rapidement la fonction à corriger.
 
-Generategrid : 
+Maze : on test si les valeur rentre sont les bonne et si la taille du labyrinthe est la bonne 
+
+isoutside : Les tests portent sur les valeurs limites : les cases situées juste à l’extérieur de la grille (ligne 0, colonne 6) doivent être détectées, et les cases situées aux coins (1,1) et (5,5) doivent être acceptées.
+
+applymove!:  Pour ce test, nous n’utilisons pas generategrid, car son résultat est aléatoire. Nous utilisons à la place la fonction testmaze, qui construit un labyrinthe dont nous connaissons la structure. Cela nous permet de prévoir le résultat de chaque déplacement (mouvement libre, mur, sortie, direction inconnue) et de le comparer à une valeur exacte.
+
+generategrid : 
 Le labyrinthe étant généré de façon aléatoire à chaque appel de la fonction nous ne pouvons pas comparer son contenu à une valeur attendue. Nous testons donc ses propriétés : sa taille, sa bordure de murs et la position du joueur et de la sortie.
+
+
 
 
 
