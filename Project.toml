@@ -22,3 +22,9 @@ GeometryBasics = "0.5.13"
 MeshIO = "0.5.5"
 Random = "1.11.0"
 WGLMakie = "0.13.16"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
