@@ -35,7 +35,7 @@ function optimalpath(grid, start, goal)
     end
 
     # Reconstruction du chemin
-    path = []
+    path = Tuple{Int, Int}[]
     position = goal
 
     # On remonte de la sortie jusqu'au départ
