@@ -67,36 +67,15 @@ Après avoir téléchargé le projet et installé Julia, il suffit d'exécuter c
 
 `julia --project=. main.jl`
 
-Puis ouvrir le lien : **http://127.0.0.1:8766**.
+Ouvrir ensuite **http://127.0.0.1:8766** dans un navigateur.
 
+## 6. Tests unitaires
 
-## 6. Ce qu'il reste à faire
+Les tests se trouvent dans `test/runtests.jl`.
 
-#### Hannah
-- **EFFECTUER DES TESTS UNITAIRES** : commande pour lancer le fichier test : julia --project=.. test.jl
-    
-  
-Pour réaliser les tests unitaires, nous avons utilisé la macro @testset, qui permet de regrouper plusieurs tests (@test) par fonction. Chaque groupe est affiché avec son propre résumé (réussis, échoués, erreurs). 
+Pour les lancer :
 
-Maze : on test si les valeur rentre sont les bonne et si la taille du labyrinthe est la bonne 
+`julia --project=. -e "using Pkg; Pkg.test()"`
 
-isoutside : Les tests portent sur les valeurs limites : les cases situées juste à l’extérieur de la grille (ligne 0, colonne 6) doivent être détectées, et les cases situées aux coins (1,1) et (5,5) doivent être acceptées.
+Ils vérifient la structure du labyrinthe, les déplacement, la géneration de la grille et le calcul du chemin optimal.
 
-applymove!:  Pour ce test, nous n’utilisons pas generategrid, car son résultat est aléatoire. Nous utilisons à la place la fonction testmaze, qui construit un labyrinthe dont nous connaissons la structure. Cela nous permet de prévoir le résultat de chaque déplacement (mouvement libre, mur, sortie, direction inconnue) et de le comparer à une valeur exacte.
-
-generategrid : 
-Le labyrinthe étant généré de façon aléatoire à chaque appel de la fonction nous ne pouvons pas comparer son contenu à une valeur attendue. Nous testons donc ses propriétés : sa taille, sa bordure de murs et la position du joueur et de la sortie.
-
-
-
-
-
- #### Samir :
-- **REDIGER LE RAPPORT HTML (avec Quarto ou un notebook Julia)**
-- **FAIRE LA PRESENTATION HTML (avec KaimonSlate ou BonitoBook)**
-- **Tu trouvera si dessus les justification des test unitaire**
-
-
-## 7. Sources : Modèles 3d et png 
-
-- à mettre dans le rapport
