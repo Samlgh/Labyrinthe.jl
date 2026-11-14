@@ -1,7 +1,7 @@
 using FileIO, MeshIO, WGLMakie, Bonito, GeometryBasics
 using WGLMakie.Makie: Button
 
-# Charger les modèles 3D avec leurs coordonnées de texture
+# Charger les modèles 3D avec leurs coordonnées de texture surtout pour les obstacles et le sol
 function loadmodel(path::AbstractString)
     model = load(path; uvtype=Vec2f)
     return GeometryBasics.expand_faceviews(model)
@@ -9,7 +9,6 @@ end
 
 # Dossier des modèles 3D
 const MODELS = normpath(joinpath(@__DIR__, "..", "models"))
-const TEXTURE = joinpath(MODELS, "mars", "textures")
 
 Base.@kwdef struct DisplayTheme # Base.@kwdef permet d'affecter les valeurs sans respecter l'ordre
     title::String
@@ -59,7 +58,7 @@ const KEYMAP = Dict(
 
 const MeshModel = Union{GeometryBasics.Mesh, GeometryBasics.MetaMesh}
 
-function view(lscene::LScene, grid::AbstractMatrix{<:Integer}, charmodel::MeshModel, exitmodel::MeshModel, obstaclemodel::MeshModel, groundmodel::MeshModel)
+function drawmaze!(lscene::LScene, grid::AbstractMatrix{<:Integer}, charmodel::MeshModel, exitmodel::MeshModel, obstaclemodel::MeshModel, groundmodel::MeshModel)
     # Effacer les dessins de la partie précédente
     for drawing in copy(lscene.scene.plots)
         delete!(lscene, drawing)
@@ -103,9 +102,9 @@ function bind!(callback::Function, fig::Figure)
     end
 end
 
-function view(rows::Int, cols::Int, theme::DisplayTheme; back=nothing)
+function drawmaze(rows::Int, cols::Int, theme::DisplayTheme; back=nothing)
     if rows < 2 || cols < 2 || rows > 20 || cols > 20
-        error("Choisissez entre 2 et 20 rows et cols.")
+        throw(ArgumentError("Choisissez entre 2 et 20 rows et cols."))
     end
 
     WGLMakie.activate!(; use_html_widgets=false)
@@ -150,7 +149,7 @@ function view(rows::Int, cols::Int, theme::DisplayTheme; back=nothing)
     maze = Maze(rows, cols)
     state = GameState((2, 2), 0, false)
     bestmoves = optimalmoves(maze.grid, (2, 2), (2*maze.rows, 2*maze.cols))
-    player, goal, obstacles = view(lscene, maze.grid, charmodel, exitmodel, obstaclemodel, groundmodel)
+    player, goal, obstacles = drawmaze!(lscene, maze.grid, charmodel, exitmodel, obstaclemodel, groundmodel)
 
     # Chemin optimal affiché par le bouton solution
     showpath = false
