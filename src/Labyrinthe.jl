@@ -7,6 +7,6 @@ include("interface.jl")
 include("interface_web.jl")
 
 export GameState, Maze, generategrid, applymove!, optimalpath, optimalmoves
-export DisplayTheme, MODES, view, menu, play
+export DisplayTheme, MODES, drawmaze, menu, play
 
 end
