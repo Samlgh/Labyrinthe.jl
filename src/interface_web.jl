@@ -135,7 +135,7 @@ function menu(startgame::Function, rows::Int=10, cols::Int=10, character::String
 end
 
 # Passer du menu au jeu et revenir au menu
-function app!()
+function app()
     # Contient l'écran affiché dans le navigateur
     page = Observable{Any}(nothing)
     # Garder les derniers choix pendant la visite
@@ -153,7 +153,7 @@ function app!()
         theme = MODES[character]
         backgrounduri = "data:image/png;base64," * base64encode(read(theme.background))
         # On crée le jeu et lui donne la fonction de retour au menu
-        fig = view(
+        fig = drawmaze(
             rows, cols, theme;
             back = home!
         )
@@ -192,5 +192,5 @@ end
 
 # Crée l'application web
 function menu()
-    return App(app!; title = "Le labyrinthe des Malicieux")
+    return App(app; title = "Le labyrinthe des Malicieux")
 end
