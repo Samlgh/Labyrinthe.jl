@@ -56,14 +56,20 @@ function applymove!(grid::Matrix{Int}, position::Tuple{Int,Int}, direction::Symb
     if grid[newrow, newcol] != 3
         grid[newrow, newcol] = 2
     end
+
     return newrow, newcol
 end
+
 function generategrid(rows::Int, cols::Int)
+    if rows < 2 || cols < 2
+        throw(ArgumentError("Le labyrinthe doit avoir au moins 2 lignes et 2 colonnes."))
+    end
+
     grid = ones(Int, 2rows + 1, 2cols + 1)
     sets = IntDisjointSet(rows * cols)
     cellindex(x, y) = (y - 1) * cols + x
 
-    # Ouvrir toutes les cellules
+    # Initialisation des cellules vides
     for y in 1:rows, x in 1:cols
         grid[2y, 2x] = 0
     end
@@ -87,5 +93,6 @@ function generategrid(rows::Int, cols::Int)
 
     grid[2, 2] = 2
     grid[2rows, 2cols] = 3
+    
     return grid
 end
