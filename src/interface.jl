@@ -121,7 +121,7 @@ function drawmaze(rows::Int, cols::Int, theme::DisplayTheme; back=nothing)
     toplayout = GridLayout(fig[1, 0:4])
     Label(toplayout[1, 1:2], theme.title, fontsize=28, color=theme.textcolor)
     menubutton = Button(toplayout[2, 1], label="Retour au menu", buttoncolor="#d6a477")
-    recenterbutton = Button(toplayout[2, 2], label="recenter", buttoncolor="#d6a477")
+    recenterbutton = Button(toplayout[2, 2], label="Recentrer", buttoncolor="#d6a477")
 
     lscene = LScene(fig[2, 1:3], show_axis=false)
     cam3d!(lscene.scene, eyeposition=(0, -1, 2))
