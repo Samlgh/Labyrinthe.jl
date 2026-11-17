@@ -16,14 +16,13 @@ end
     @test !Labyrinthe.isoutside(5, 5, 5, 5)
 end
 
-# Crée un labyrinthe fixe pour vérifier les déplacements et le chemin
 function testmaze()
     return Maze(2, 2, [1 1 1 1 1;
                        1 2 0 0 1;
                        1 1 1 0 1;
                        1 1 1 3 1;
                        1 1 1 1 1])
-end 
+end #fonction de transition 
 
 @testset "applymove!" begin
     # le personnage ne peut pas bouger (murs)
@@ -39,16 +38,12 @@ end
     @test maze.grid[2, 2] == 0
     @test maze.grid[2, 3] == 2
 
-    # Amener le personnage de (2, 2) à (2, 4)
     maze = testmaze()
-    applymove!(maze.grid, (2, 2), :right)
-    applymove!(maze.grid, (2, 3), :right)
-
-    # Le mur au-dessus bloque le déplacement
-    @test applymove!(maze.grid, (2, 4), :up) == (2, 4)
     @test applymove!(maze.grid, (2, 4), :down) == (3, 4)
+    @test applymove!(maze.grid, (2, 4), :up) == (2, 4)   # mur au-dessus
 
-    # Atteindre la sortie sans écraser sa valeur
+    # le personnage atteint la sortie sans l'écraser
+    maze = testmaze()
     @test applymove!(maze.grid, (3, 4), :down) == (4, 4)
     @test maze.grid[4, 4] == 3
 
@@ -72,20 +67,42 @@ end
 # tests sur le fichier jeu
 @testset "optimalpath" begin
     maze = testmaze()
-    
-    # Le chemin attendu dans notre grille connue
-    chemin = [(2, 2), (2, 3), (2, 4), (3, 4), (4, 4)]
-    @test optimalpath(maze.grid, (2, 2), (4, 4)) == chemin
+    @test optimalpath(maze.grid, (2, 2), (4, 4)) == [(2,2), (2,3), (2,4), (3,4), (4,4)]  # test du début
+    @test optimalpath(maze.grid, (2, 4), (4, 4)) == [(2,4), (3,4), (4,4)]                # test du milieu
+    @test optimalpath(maze.grid, (4, 4), (4, 4)) == [(4, 4)]                             # test de fin
 
-    # Si on est déjà à l'arrivée
-    @test optimalpath(maze.grid, (4, 4), (4, 4)) == [(4, 4)]
+    open = [1 1 1 1 1;
+            1 2 0 0 1;
+            1 0 0 0 1;
+            1 0 0 3 1;
+            1 1 1 1 1]
+    path = optimalpath(open, (2, 2), (4, 4))
+    @test length(path) == 5
+    @test first(path) == (2, 2)
+    @test last(path) == (4, 4)
+    for k in 1:length(path)-1
+        (r1, c1), (r2, c2) = path[k], path[k+1]
+        @test abs(r1 - r2) + abs(c1 - c2) == 1   # un pas à la fois
+        @test open[r2, c2] != 1                  # aucun mur traversé
+    end
+
+    # la grille n'est pas modifiée
+    maze = testmaze()
+    optimalpath(maze.grid, (2, 2), (4, 4))
+    @test maze.grid == testmaze().grid
+
+    # sortie inaccessible
+    blocked = [1 1 1 1 1;
+               1 2 0 1 1;
+               1 1 1 1 1;
+               1 1 1 3 1;
+               1 1 1 1 1]
+    @test isempty(optimalpath(blocked, (2, 2), (4, 4)))
 end
 
 @testset "optimalmoves" begin
     maze = testmaze()
-    
-    # Cinq cases dans le chemin, donc 4 déplacements
     @test optimalmoves(maze.grid, (2, 2), (4, 4)) == 4
-    # Si on est déjà à l'arrivée, aucun déplacement
+    @test optimalmoves(maze.grid, (2, 4), (4, 4)) == 2
     @test optimalmoves(maze.grid, (4, 4), (4, 4)) == 0
 end
