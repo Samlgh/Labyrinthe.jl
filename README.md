@@ -53,7 +53,8 @@ Le projet utilise :
 - **`src/jeu.jl`** : contient les algorithmes du jeu, notamment BFS.
 - **`src/interface.jl`** : gère l'affichage 3D et les interactions.
 - **`src/interface_web.jl`** : gère le menu d'accueil et la navigation.
-- **`models/`** : contient les modèles 3D, matériaux et textures. RESTE LES 2 AUTRES MODES, A VOIR AVEC HANNAH.
+- **`models/`** : contient les modèles 3D, matériaux et textures.
+- **`tests/`** : contient des tests qui vérifient la structure du labyrinthe, les déplacements, la géneration de la grille et le calcul du chemin optimal.
 
 ## 5. Exécution sur un autre pc
 
@@ -76,6 +77,3 @@ Les tests se trouvent dans `test/runtests.jl`.
 Pour les lancer :
 
 `julia --project=. -e "using Pkg; Pkg.test()"`
-
-Ils vérifient la structure du labyrinthe, les déplacement, la géneration de la grille et le calcul du chemin optimal.
-
