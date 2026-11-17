@@ -33,7 +33,12 @@ function optimalpath(grid, start, goal)
             end
         end
     end
-
+    
+    # Si aucun chemin n'existe, on renvoie un vecteur vide
+    if start != goal && previous[goal...] == (0, 0)
+        return Tuple{Int, Int}[]
+    end
+    
     # Reconstruction du chemin
     path = Tuple{Int, Int}[]
     position = goal
