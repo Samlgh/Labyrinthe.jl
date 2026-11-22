@@ -3,9 +3,10 @@
 Projet réalisé en **Julia**, avec une interface web développée avec **WGLMakie** et **Bonito**.
 Le jeu consiste à guider un personnage à travers un labyrinthe généré aléatoirement pour atteindre la sortie, en utilisant les flèches du clavier.
 
+
 ## 1. Environnement Julia et packages
 
-On a un environnement virtuel Julia (`venv`) avec :
+On a un environnement Julia propre au projet, avec :
 
 - **`Project.toml`** qui contient les dépendances du projet.
 - **`Manifest.toml`** qui contient les versions de chaque package
@@ -17,6 +18,7 @@ Pour installer automatiquement les dépendances, ouvrir un terminal dans le doss
 `julia --project=. installer.jl`
 
 ça active l'environnement Julia du projet et installe tout les packages nécessaires grâce à `Pkg.instantiate()`
+
 
 ## 2. Lancer le jeu
 
@@ -34,6 +36,7 @@ Le menu d'accueil permet de choisir la taille du labyrinthe et le personnage.
 
 Pour arrêter le serveur, il faut faire `Ctrl+C` dans le terminal.
 
+
 ## 3. Fonctionnement du jeu
 
 Le projet utilise :
@@ -43,6 +46,7 @@ Le projet utilise :
 - **WGLMakie** pour afficher le labyrinthe et les modèles 3D.
 - **Bonito** pour créer et servir l'application web interactive.
 - **Julia** pour gérer les déplacements, les obstacles, les compteurs et les événements...
+
 
 ## 4. Organisation du projet
 
@@ -54,7 +58,8 @@ Le projet utilise :
 - **`src/interface.jl`** : gère l'affichage 3D et les interactions.
 - **`src/interface_web.jl`** : gère le menu d'accueil et la navigation.
 - **`models/`** : contient les modèles 3D, matériaux et textures.
-- **`tests/`** : contient des tests qui vérifient la structure du labyrinthe, les déplacements, la géneration de la grille et le calcul du chemin optimal.
+- **`test/`** : contient des tests qui vérifient la structure du labyrinthe, les déplacements, la géneration de la grille et le calcul du chemin optimal.
+
 
 ## 5. Exécution sur un autre pc
 
@@ -70,6 +75,7 @@ Après avoir téléchargé le projet et installé Julia, il suffit d'exécuter c
 
 Ouvrir ensuite **http://127.0.0.1:8766** dans un navigateur.
 
+
 ## 6. Tests unitaires
 
 Les tests se trouvent dans `test/runtests.jl`.
@@ -77,3 +83,32 @@ Les tests se trouvent dans `test/runtests.jl`.
 Pour les lancer :
 
 `julia --project=. -e "using Pkg; Pkg.test()"`
+
+**Les 45 tests unitaires ont été exécutés avec succès**
+
+
+## 7. Rapport et présentation
+
+Le rapport et la présentation ont été réalisés avec **Quarto** et **Julia**. 
+
+Pour les consulter dans un navigateur, ouvrir `rapport.html` ou `presentation.html` (d'ici le 30/11).
+
+Le fichier `rapport.qmd` contient les explications, les exemples en Julia et les démonstrations interactives. 
+Le fichier `rapport.qmd` contient ...
+
+### Régénérer les fichiers HTML
+
+Pour modifier ou régénérer les documents, il faut installer [Quarto](https://quarto.org/) et disposer de l'environnement Julia du projet.
+
+Depuis le dossier principal du projet, exécuter :
+
+```powershell
+quarto render rapport.qmd
+quarto render presentation.qmd
+```
+Sous Windows, les commandes suivantes ouvrent les fichiers HTML dans le navigateur :
+
+```powershell
+start rapport.html
+start presentation.html
+```
